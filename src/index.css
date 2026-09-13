@@ -1,0 +1,90 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased font-sans selection:bg-emerald-500 selection:text-slate-950 overflow-hidden;
+  }
+}
+
+/* Custom markdown rendering within nodes */
+.prose-node {
+  color: #cbd5e1;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.prose-node h1,
+.prose-node h2,
+.prose-node h3,
+.prose-node h4 {
+  color: #f1f5f9;
+  font-weight: 600;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.prose-node h1 { font-size: 1rem; border-bottom: 1px solid #334155; padding-bottom: 0.2rem; }
+.prose-node h2 { font-size: 0.9375rem; color: #34d399; }
+.prose-node h3 { font-size: 0.875rem; color: #6ee7b7; }
+
+.prose-node p {
+  margin-bottom: 0.5rem;
+}
+
+.prose-node ul {
+  list-style-type: disc;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-node ol {
+  list-style-type: decimal;
+  padding-left: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-node li {
+  margin-bottom: 0.15rem;
+}
+
+.prose-node code {
+  background: #090d16;
+  color: #34d399;
+  padding: 0.1rem 0.3rem;
+  border-radius: 0.2rem;
+  font-size: 0.85em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.prose-node pre {
+  background: #050811;
+  border: 1px solid #1e293b;
+  padding: 0.6rem;
+  border-radius: 0.375rem;
+  overflow-x: auto;
+  margin: 0.5rem 0;
+}
+
+.prose-node blockquote {
+  border-left: 2px solid #10b981;
+  padding-left: 0.6rem;
+  color: #94a3b8;
+  font-style: italic;
+  margin: 0.4rem 0;
+}
+
+/* React Flow custom dark theme overrides */
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+  background-color: #475569;
+  border: 2px solid #0f172a;
+}
+.react-flow__handle:hover {
+  background-color: #10b981;
+}
+.react-flow__attribution {
+  display: none !important;
+}

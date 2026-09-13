@@ -1,0 +1,286 @@
+﻿import { NodeType, NodeTypeConfig } from '../types/node';
+
+export const NODE_CONFIGS: Record<NodeType, NodeTypeConfig> = {
+  // PLANNING
+  idea: {
+    type: 'idea',
+    category: 'planning',
+    label: 'Idea',
+    shortDescription: 'Raw concept, problem hook, and initial inspiration',
+    color: 'emerald',
+    accentBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    borderColor: 'border-emerald-500/40',
+    badgeBg: 'bg-emerald-500/20 text-emerald-300',
+    iconName: 'Lightbulb',
+    defaultTitle: 'Project Idea',
+    defaultContent: '## Core Vision\nDescribe the raw product idea, target audience, and primary pain point solved.'
+  },
+  requirements: {
+    type: 'requirements',
+    category: 'planning',
+    label: 'Requirements',
+    shortDescription: 'Functional & non-functional project requirements',
+    color: 'teal',
+    accentBg: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
+    borderColor: 'border-teal-500/40',
+    badgeBg: 'bg-teal-500/20 text-teal-300',
+    iconName: 'ClipboardList',
+    defaultTitle: 'System Requirements',
+    defaultContent: '## Functional Requirements\n- FR-1: ...\n- FR-2: ...\n\n## Non-Functional Requirements\n- NFR-1: Performance...\n- NFR-2: Security...'
+  },
+  prd: {
+    type: 'prd',
+    category: 'planning',
+    label: 'PRD',
+    shortDescription: 'Comprehensive Product Requirements Document',
+    color: 'cyan',
+    accentBg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/30',
+    borderColor: 'border-cyan-500/40',
+    badgeBg: 'bg-cyan-500/20 text-cyan-300',
+    iconName: 'FileText',
+    defaultTitle: 'Product Requirements Document',
+    defaultContent: '## 1. Product Overview\n\n## 2. Problem Statement\n\n## 3. Goals & Success Metrics\n\n## 4. Core Features\n\n## 5. Non-Goals'
+  },
+  user_stories: {
+    type: 'user_stories',
+    category: 'planning',
+    label: 'User Stories',
+    shortDescription: 'As a user, I want to... so that...',
+    color: 'sky',
+    accentBg: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
+    borderColor: 'border-sky-500/40',
+    badgeBg: 'bg-sky-500/20 text-sky-300',
+    iconName: 'Users',
+    defaultTitle: 'User Stories',
+    defaultContent: '### US-01: User Registration\nAs a visitor, I want to sign up with email so that I can create a private account.\n\n**Acceptance Criteria:**\n- Validates email format\n- Secure password hashing'
+  },
+  scope: {
+    type: 'scope',
+    category: 'planning',
+    label: 'Scope',
+    shortDescription: 'In-scope vs out-of-scope boundaries (MVP vs Later)',
+    color: 'blue',
+    accentBg: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    borderColor: 'border-blue-500/40',
+    badgeBg: 'bg-blue-500/20 text-blue-300',
+    iconName: 'Target',
+    defaultTitle: 'Project Scope',
+    defaultContent: '## In-Scope (MVP)\n- Feature 1\n- Feature 2\n\n## Out-of-Scope (Post-MVP)\n- Advanced analytics\n- Third-party integrations'
+  },
+  assumptions: {
+    type: 'assumptions',
+    category: 'planning',
+    label: 'Assumptions',
+    shortDescription: 'Baseline assumptions and external constraints',
+    color: 'indigo',
+    accentBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/30',
+    borderColor: 'border-indigo-500/40',
+    badgeBg: 'bg-indigo-500/20 text-indigo-300',
+    iconName: 'HelpCircle',
+    defaultTitle: 'Assumptions & Constraints',
+    defaultContent: '## Assumptions\n- Users have modern browser support\n- Average load under 10k daily active users\n\n## Constraints\n- Zero budget for third-party paid APIs'
+  },
+
+  // TECHNICAL
+  architecture: {
+    type: 'architecture',
+    category: 'technical',
+    label: 'Architecture',
+    shortDescription: 'System topology, backend/frontend, auth, data flows',
+    color: 'violet',
+    accentBg: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
+    borderColor: 'border-violet-500/40',
+    badgeBg: 'bg-violet-500/20 text-violet-300',
+    iconName: 'Layers',
+    defaultTitle: 'System Architecture',
+    defaultContent: '## Architecture Overview\n- Client: SPA / SSR\n- Server: REST / GraphQL\n- Database: Relational / Document\n\n## Communication Flow\nClient -> API Gateway -> Service Layer -> DB'
+  },
+  tech_stack: {
+    type: 'tech_stack',
+    category: 'technical',
+    label: 'Tech Stack',
+    shortDescription: 'Selected frameworks, tools, and technical justifications',
+    color: 'purple',
+    accentBg: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    borderColor: 'border-purple-500/40',
+    badgeBg: 'bg-purple-500/20 text-purple-300',
+    iconName: 'Cpu',
+    defaultTitle: 'Technology Stack',
+    defaultContent: '## Frontend\n- React + TypeScript\n  - Reason: Strong ecosystem & component typing\n- Tailwind CSS\n\n## Backend\n- Node.js / FastAPI\n\n## Database\n- SQLite / PostgreSQL'
+  },
+  data_model: {
+    type: 'data_model',
+    category: 'technical',
+    label: 'Data Model',
+    shortDescription: 'Entities, schemas, relationships, and data fields',
+    color: 'fuchsia',
+    accentBg: 'bg-fuchsia-500/10 text-fuchsia-400 border-fuchsia-500/30',
+    borderColor: 'border-fuchsia-500/40',
+    badgeBg: 'bg-fuchsia-500/20 text-fuchsia-300',
+    iconName: 'Database',
+    defaultTitle: 'Data Model & Schemas',
+    defaultContent: '### User\n- id: UUID (PK)\n- email: String (Unique)\n- created_at: Timestamp\n\n### Project\n- id: UUID (PK)\n- user_id: UUID (FK -> User.id)\n- title: String\n\n**Relations:** User 1 -> N Project'
+  },
+  api: {
+    type: 'api',
+    category: 'technical',
+    label: 'API Specification',
+    shortDescription: 'Endpoints, request/response contracts, status codes',
+    color: 'pink',
+    accentBg: 'bg-pink-500/10 text-pink-400 border-pink-500/30',
+    borderColor: 'border-pink-500/40',
+    badgeBg: 'bg-pink-500/20 text-pink-300',
+    iconName: 'Network',
+    defaultTitle: 'API Endpoints',
+    defaultContent: '### `GET /api/projects`\nFetch all projects.\n- Response: `200 OK` `[{ id, title }]`\n\n### `POST /api/projects`\nCreate project.\n- Body: `{ title: string }`\n- Response: `201 Created`'
+  },
+  folder_structure: {
+    type: 'folder_structure',
+    category: 'technical',
+    label: 'Folder Structure',
+    shortDescription: 'Repository tree layout and module boundaries',
+    color: 'rose',
+    accentBg: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
+    borderColor: 'border-rose-500/40',
+    badgeBg: 'bg-rose-500/20 text-rose-300',
+    iconName: 'FolderTree',
+    defaultTitle: 'Folder Structure',
+    defaultContent: '```\nsrc/\n├── components/   # UI components\n├── hooks/        # Custom React hooks\n├── services/     # API & Storage\n├── types/        # TypeScript declarations\n└── utils/        # Shared helper functions\n```'
+  },
+
+  // PRODUCT / DESIGN
+  ui_ux: {
+    type: 'ui_ux',
+    category: 'product',
+    label: 'UI / UX Design',
+    shortDescription: 'Visual hierarchy, wireframes, responsiveness, states',
+    color: 'amber',
+    accentBg: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    borderColor: 'border-amber-500/40',
+    badgeBg: 'bg-amber-500/20 text-amber-300',
+    iconName: 'Layout',
+    defaultTitle: 'UI / UX Design Specs',
+    defaultContent: '## Design Principles\n- Minimalist dark developer tool aesthetic\n- High data density with clean visual spacing\n\n## Key Screens\n1. Project Canvas\n2. Task Board\n3. Export Hub'
+  },
+  user_flow: {
+    type: 'user_flow',
+    category: 'product',
+    label: 'User Flow',
+    shortDescription: 'Step-by-step user journeys and navigation pathways',
+    color: 'orange',
+    accentBg: 'bg-orange-500/10 text-orange-400 border-orange-500/30',
+    borderColor: 'border-orange-500/40',
+    badgeBg: 'bg-orange-500/20 text-orange-300',
+    iconName: 'GitMerge',
+    defaultTitle: 'User Flow Diagram',
+    defaultContent: '1. Landing Page -> Click "New Project"\n2. Canvas Loads -> Enter Prompt\n3. Graph Synthesizes -> Inspect Nodes\n4. Validation -> Export Context'
+  },
+  components: {
+    type: 'components',
+    category: 'product',
+    label: 'Components',
+    shortDescription: 'Reusable UI component inventory and props',
+    color: 'lime',
+    accentBg: 'bg-lime-500/10 text-lime-400 border-lime-500/30',
+    borderColor: 'border-lime-500/40',
+    badgeBg: 'bg-lime-500/20 text-lime-300',
+    iconName: 'Component',
+    defaultTitle: 'Component Inventory',
+    defaultContent: '### Reusable Components\n- `Button`: Primary, secondary, outline, danger\n- `Modal`: Base dialog with keyboard trapping\n- `Card`: Canvas draggable container'
+  },
+
+  // EXECUTION
+  tasks: {
+    type: 'tasks',
+    category: 'execution',
+    label: 'Tasks & Phases',
+    shortDescription: 'Step-by-step execution tasks with acceptance criteria',
+    color: 'emerald',
+    accentBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    borderColor: 'border-emerald-500/40',
+    badgeBg: 'bg-emerald-500/20 text-emerald-300',
+    iconName: 'CheckSquare',
+    defaultTitle: 'Development Tasks',
+    defaultContent: '### Phase 1: Setup\n- [ ] TASK-001: Project scaffolding\n- [ ] TASK-002: Base components\n\n### Phase 2: Core Logic\n- [ ] TASK-003: State management'
+  },
+  dependencies: {
+    type: 'dependencies',
+    category: 'execution',
+    label: 'Dependencies',
+    shortDescription: 'External packages, libraries, and runtime dependencies',
+    color: 'zinc',
+    accentBg: 'bg-zinc-500/10 text-zinc-400 border-zinc-500/30',
+    borderColor: 'border-zinc-500/40',
+    badgeBg: 'bg-zinc-500/20 text-zinc-300',
+    iconName: 'Package',
+    defaultTitle: 'Package Dependencies',
+    defaultContent: '## Core Dependencies\n- `@xyflow/react`\n- `lucide-react`\n- `marked`'
+  },
+  test_plan: {
+    type: 'test_plan',
+    category: 'execution',
+    label: 'Test Plan',
+    shortDescription: 'Unit, integration, and E2E verification test strategy',
+    color: 'emerald',
+    accentBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
+    borderColor: 'border-emerald-500/40',
+    badgeBg: 'bg-emerald-500/20 text-emerald-300',
+    iconName: 'ShieldCheck',
+    defaultTitle: 'Quality & Test Plan',
+    defaultContent: '## Unit Tests\n- Test graph validation logic\n- Test markdown generator\n\n## Integration Tests\n- Test project import and export\n- Test node connection updates'
+  },
+  acceptance_criteria: {
+    type: 'acceptance_criteria',
+    category: 'execution',
+    label: 'Acceptance Criteria',
+    shortDescription: 'Definition of Done and verifiable pass/fail conditions',
+    color: 'teal',
+    accentBg: 'bg-teal-500/10 text-teal-400 border-teal-500/30',
+    borderColor: 'border-teal-500/40',
+    badgeBg: 'bg-teal-500/20 text-teal-300',
+    iconName: 'CheckCircle2',
+    defaultTitle: 'Global Acceptance Criteria',
+    defaultContent: '1. All unit tests pass with zero errors\n2. Zero critical security vulnerabilities\n3. Fully responsive on modern displays'
+  },
+  validation: {
+    type: 'validation',
+    category: 'execution',
+    label: 'Validation',
+    shortDescription: 'Project health, edge-case analysis, and sanity checks',
+    color: 'amber',
+    accentBg: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
+    borderColor: 'border-amber-500/40',
+    badgeBg: 'bg-amber-500/20 text-amber-300',
+    iconName: 'AlertTriangle',
+    defaultTitle: 'Plan Validation',
+    defaultContent: '## Pre-Flight Checklist\n- [x] Clear business problem defined\n- [ ] Database schema finalized\n- [ ] Authentication mechanism chosen'
+  },
+
+  // AI / CUSTOM
+  ai_context: {
+    type: 'ai_context',
+    category: 'ai',
+    label: 'AI Coding Context',
+    shortDescription: 'Ready-to-feed system context for AI coding agents',
+    color: 'purple',
+    accentBg: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
+    borderColor: 'border-purple-500/40',
+    badgeBg: 'bg-purple-500/20 text-purple-300',
+    iconName: 'Sparkles',
+    defaultTitle: 'AI Coding Context Prompt',
+    defaultContent: 'You are an autonomous Senior Software Engineer implementing this project.\nRefer to the attached specifications and follow atomic commits.'
+  },
+  custom: {
+    type: 'custom',
+    category: 'planning',
+    label: 'Custom Note',
+    shortDescription: 'Freeform developer note or custom planning artifact',
+    color: 'slate',
+    accentBg: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
+    borderColor: 'border-slate-500/40',
+    badgeBg: 'bg-slate-500/20 text-slate-300',
+    iconName: 'StickyNote',
+    defaultTitle: 'Custom Note',
+    defaultContent: 'Write any custom notes, scratch ideas, or considerations here.'
+  }
+};
