@@ -1,8 +1,8 @@
 ﻿import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
+  ReactFlowProvider,
   Background,
-  Controls,
   MiniMap,
   Connection,
   Edge,
@@ -26,7 +26,7 @@ interface PlannerCanvasProps {
   onTriggerAIForNode: (nodeId: string, action: NodeAIActionType) => void;
 }
 
-export const PlannerCanvas: React.FC<PlannerCanvasProps> = ({ store, onTriggerAIForNode }) => {
+const PlannerCanvasInner: React.FC<PlannerCanvasProps> = ({ store, onTriggerAIForNode }) => {
   const {
     project,
     setProject,
@@ -178,7 +178,7 @@ export const PlannerCanvas: React.FC<PlannerCanvasProps> = ({ store, onTriggerAI
         {/* Prominent Zoom & View Controls */}
         <CanvasControls onAutoLayout={handleAutoLayout} />
 
-        {/* MiniMap on top-right or bottom-right */}
+        {/* MiniMap on bottom-right */}
         <MiniMap
           className="!bg-slate-900/95 !border !border-slate-800 !rounded-xl !shadow-2xl"
           nodeColor="#334155"
@@ -188,5 +188,13 @@ export const PlannerCanvas: React.FC<PlannerCanvasProps> = ({ store, onTriggerAI
         />
       </ReactFlow>
     </div>
+  );
+};
+
+export const PlannerCanvas: React.FC<PlannerCanvasProps> = (props) => {
+  return (
+    <ReactFlowProvider>
+      <PlannerCanvasInner {...props} />
+    </ReactFlowProvider>
   );
 };
