@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+﻿import React, { useState, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { NODE_CONFIGS } from '../../constants/nodeConfigs';
 import { PlannerNodeData, NodeStatus } from '../../types/node';
@@ -16,14 +16,6 @@ import {
   Check
 } from 'lucide-react';
 
-export interface BaseNodeCustomEvents {
-  onUpdateNode?: (id: string, partial: Partial<PlannerNodeData>, markDownstream?: boolean) => void;
-  onDuplicateNode?: (id: string) => void;
-  onDeleteNode?: (id: string) => void;
-  onTriggerAIAction?: (id: string, action: NodeAIActionType) => void;
-  onDismissOutdated?: (id: string) => void;
-}
-
 export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
   const nodeData = data as PlannerNodeData;
   const config = NODE_CONFIGS[nodeData.type] || NODE_CONFIGS.custom;
@@ -34,33 +26,33 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
   const statusBadges: Record<NodeStatus, { label: string; icon: React.ReactNode; badgeClass: string }> = {
     draft: {
       label: 'Draft',
-      icon: <FileEdit className="w-3 h-3 text-slate-400" />,
+      icon: <FileEdit className="w-3.5 h-3.5 text-slate-400" />,
       badgeClass: 'bg-slate-800 text-slate-300 border-slate-700'
     },
     in_review: {
       label: 'In Review',
-      icon: <Clock className="w-3 h-3 text-sky-400" />,
-      badgeClass: 'bg-sky-950/60 text-sky-300 border-sky-800/80'
+      icon: <Clock className="w-3.5 h-3.5 text-sky-400" />,
+      badgeClass: 'bg-sky-950/70 text-sky-300 border-sky-800/90'
     },
     approved: {
       label: 'Approved',
-      icon: <CheckCircle className="w-3 h-3 text-emerald-400" />,
-      badgeClass: 'bg-emerald-950/60 text-emerald-300 border-emerald-800/80'
+      icon: <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
+      badgeClass: 'bg-emerald-950/70 text-emerald-300 border-emerald-800/90'
     },
     blocked: {
       label: 'Blocked',
-      icon: <Ban className="w-3 h-3 text-rose-400" />,
-      badgeClass: 'bg-rose-950/60 text-rose-300 border-rose-800/80'
+      icon: <Ban className="w-3.5 h-3.5 text-rose-400" />,
+      badgeClass: 'bg-rose-950/70 text-rose-300 border-rose-800/90'
     },
     complete: {
       label: 'Complete',
-      icon: <Check className="w-3 h-3 text-purple-400" />,
-      badgeClass: 'bg-purple-950/60 text-purple-300 border-purple-800/80'
+      icon: <Check className="w-3.5 h-3.5 text-purple-400" />,
+      badgeClass: 'bg-purple-950/70 text-purple-300 border-purple-800/90'
     },
     outdated: {
       label: 'Outdated',
-      icon: <AlertTriangle className="w-3 h-3 text-amber-400 animate-pulse" />,
-      badgeClass: 'bg-amber-950/70 text-amber-300 border-amber-800/90'
+      icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-400 animate-pulse" />,
+      badgeClass: 'bg-amber-950/80 text-amber-300 border-amber-800'
     }
   };
 
@@ -138,28 +130,28 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
 
   return (
     <div
-      className={`w-[440px] bg-slate-900/95 border rounded-xl shadow-2xl backdrop-blur transition-all duration-200 ${
-        selected ? 'border-brand-400 ring-2 ring-brand-500/20 shadow-brand-500/10' : 'border-slate-800/90'
-      } ${nodeData.status === 'outdated' ? 'border-amber-500/50' : ''}`}
+      className={`w-[440px] bg-slate-900/98 border rounded-xl shadow-2xl backdrop-blur-md transition-all duration-200 ${
+        selected ? 'border-brand-400 ring-2 ring-brand-500/30 shadow-brand-500/20' : 'border-slate-800'
+      } ${nodeData.status === 'outdated' ? 'border-amber-500/60 ring-1 ring-amber-500/20' : ''}`}
     >
       {/* Target Handles for incoming connections */}
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3 h-3 !bg-slate-700 hover:!bg-brand-400 !border-2 !border-slate-900 transition-colors"
+        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
       />
       <Handle
         type="target"
         position={Position.Left}
-        className="w-3 h-3 !bg-slate-700 hover:!bg-brand-400 !border-2 !border-slate-900 transition-colors"
+        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
       />
 
       {/* Node Header */}
-      <div className="p-3 border-b border-slate-800 flex items-center justify-between gap-2 bg-slate-950/40 rounded-t-xl">
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+      <div className="p-3.5 border-b border-slate-800 flex items-center justify-between gap-2 bg-slate-950/60 rounded-t-xl">
+        <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {/* Node Type pill */}
           <span
-            className={`text-xs uppercase font-mono px-2 py-0.5 rounded border font-semibold shrink-0 ${config.accentBg}`}
+            className={`text-[11px] uppercase font-mono px-2.5 py-0.5 rounded border font-semibold tracking-wider shrink-0 ${config.accentBg}`}
           >
             {config.label}
           </span>
@@ -176,12 +168,12 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
                 if (e.key === 'Escape') setIsEditingTitle(false);
               }}
               autoFocus
-              className="bg-slate-950 border border-brand-500 rounded px-1.5 py-0.5 text-xs text-slate-100 font-semibold focus:outline-none w-full nodrag"
+              className="bg-slate-950 border border-brand-500 rounded px-2 py-0.5 text-sm text-slate-100 font-semibold focus:outline-none w-full nodrag"
             />
           ) : (
             <h3
               onDoubleClick={() => setIsEditingTitle(true)}
-              className="text-sm font-semibold text-slate-100 truncate cursor-text flex-1"
+              className="text-sm font-semibold text-slate-100 truncate cursor-text flex-1 hover:text-brand-300 transition"
               title="Double click to rename"
             >
               {nodeData.title}
@@ -190,18 +182,18 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
         </div>
 
         {/* Controls on header right: Version badge, Status pill, Collapse */}
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <span
-            className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-400 flex items-center gap-0.5"
+            className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 flex items-center gap-1 border border-slate-700/60"
             title={`Version ${nodeData.version || 1}`}
           >
-            <History className="w-2.5 h-2.5" />
+            <History className="w-3 h-3 text-slate-400" />
             <span>v{nodeData.version || 1}</span>
           </span>
 
           <button
             onClick={cycleStatus}
-            className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border transition cursor-pointer ${currentStatusBadge.badgeClass}`}
+            className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full border transition cursor-pointer ${currentStatusBadge.badgeClass}`}
             title="Click to cycle status"
           >
             {currentStatusBadge.icon}
@@ -210,24 +202,24 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
 
           <button
             onClick={handleToggleCollapse}
-            className="p-1 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
+            className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
             title={nodeData.collapsed ? 'Expand node' : 'Collapse node'}
           >
-            {nodeData.collapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+            {nodeData.collapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
       {/* Outdated Warning Banner */}
       {nodeData.status === 'outdated' && (
-        <div className="bg-amber-950/40 border-b border-amber-900/60 px-3 py-1.5 flex items-center justify-between text-[11px] text-amber-300">
-          <div className="flex items-center gap-1.5 truncate">
-            <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-amber-400" />
+        <div className="bg-amber-950/60 border-b border-amber-900/80 px-3.5 py-2 flex items-center justify-between text-xs text-amber-300">
+          <div className="flex items-center gap-2 truncate">
+            <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
             <span className="truncate">{nodeData.outdatedReason || 'Upstream dependencies modified.'}</span>
           </div>
           <button
             onClick={handleDismissOutdated}
-            className="text-[10px] bg-amber-900/40 hover:bg-amber-900/70 border border-amber-700/50 px-1.5 py-0.5 rounded text-amber-200 transition cursor-pointer ml-2 shrink-0"
+            className="text-[11px] bg-amber-900/60 hover:bg-amber-900/90 border border-amber-700/60 px-2 py-0.5 rounded text-amber-200 transition cursor-pointer ml-2 shrink-0 font-medium"
           >
             Acknowledge
           </button>
@@ -252,12 +244,12 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
       <Handle
         type="source"
         position={Position.Bottom}
-        className="w-3 h-3 !bg-slate-700 hover:!bg-brand-400 !border-2 !border-slate-900 transition-colors"
+        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
       />
       <Handle
         type="source"
         position={Position.Right}
-        className="w-3 h-3 !bg-slate-700 hover:!bg-brand-400 !border-2 !border-slate-900 transition-colors"
+        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
       />
     </div>
   );

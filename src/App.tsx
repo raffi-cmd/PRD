@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { usePlannerStore } from './hooks/usePlannerStore';
 import { useAutoSave } from './hooks/useAutoSave';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
@@ -54,11 +54,6 @@ export const App: React.FC = () => {
   const [activeProposal, setActiveProposal] = useState<AIProposal | null>(null);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Zoom control callbacks — populated by PlannerCanvas via its own useReactFlow
-  const zoomInRef = useRef<() => void>(() => {});
-  const zoomOutRef = useRef<() => void>(() => {});
-  const fitViewRef = useRef<() => void>(() => {});
 
   // Load saved project from IndexedDB on initial mount
   useEffect(() => {
@@ -264,9 +259,6 @@ export const App: React.FC = () => {
         canRedo={canRedo}
         onUndo={undo}
         onRedo={redo}
-        onZoomIn={() => zoomInRef.current()}
-        onZoomOut={() => zoomOutRef.current()}
-        onFitView={() => fitViewRef.current()}
         onOpenGenerateModal={() => setIsGenerateModalOpen(true)}
         onOpenValidation={() => setIsValidationOpen(true)}
         onOpenExport={() => setIsExportOpen(true)}
@@ -290,13 +282,7 @@ export const App: React.FC = () => {
 
         {/* Node Canvas */}
         <main className="flex-1 relative h-full">
-          <PlannerCanvas
-            store={store}
-            onTriggerAIForNode={handleTriggerAIForNode}
-            zoomInRef={zoomInRef}
-            zoomOutRef={zoomOutRef}
-            fitViewRef={fitViewRef}
-          />
+          <PlannerCanvas store={store} onTriggerAIForNode={handleTriggerAIForNode} />
 
           {/* Toast Notification */}
           {toastMessage && (

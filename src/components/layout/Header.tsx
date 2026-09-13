@@ -9,10 +9,7 @@ import {
   Settings,
   Command,
   Layers,
-  Plus,
-  ZoomIn,
-  ZoomOut,
-  Maximize2
+  Plus
 } from 'lucide-react';
 import { SaveStatus } from '../../hooks/useAutoSave';
 import { HealthReport } from '../../types/validation';
@@ -25,9 +22,6 @@ interface HeaderProps {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
-  onZoomIn: () => void;
-  onZoomOut: () => void;
-  onFitView: () => void;
   onOpenGenerateModal: () => void;
   onOpenValidation: () => void;
   onOpenExport: () => void;
@@ -45,9 +39,6 @@ export const Header: React.FC<HeaderProps> = ({
   canRedo,
   onUndo,
   onRedo,
-  onZoomIn,
-  onZoomOut,
-  onFitView,
   onOpenGenerateModal,
   onOpenValidation,
   onOpenExport,
@@ -145,7 +136,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Middle: Undo / Redo, Zoom Controls & Command Palette Shortcut */}
+      {/* Middle: Undo / Redo & Command Palette Shortcut */}
       <div className="flex items-center gap-1">
         <button
           onClick={onUndo}
@@ -163,32 +154,6 @@ export const Header: React.FC<HeaderProps> = ({
           title="Redo (Ctrl+Shift+Z)"
         >
           <Redo2 className="w-4 h-4" />
-        </button>
-
-        {/* Divider */}
-        <div className="w-px h-5 bg-slate-700/80 mx-1" />
-
-        {/* Zoom Controls */}
-        <button
-          onClick={onZoomOut}
-          className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
-          title="Zoom Out (−)"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onFitView}
-          className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
-          title="Fit View (center canvas)"
-        >
-          <Maximize2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onZoomIn}
-          className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
-          title="Zoom In (+)"
-        >
-          <ZoomIn className="w-4 h-4" />
         </button>
 
         <button

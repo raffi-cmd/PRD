@@ -1,7 +1,6 @@
-import React, { useMemo, useCallback, useEffect } from 'react';
+﻿import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
-  ReactFlowProvider,
   Background,
   Controls,
   MiniMap,
@@ -12,32 +11,22 @@ import {
   EdgeChange,
   applyNodeChanges,
   applyEdgeChanges,
-  BackgroundVariant,
-  useReactFlow
+  BackgroundVariant
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
 import { BaseNode } from '../nodes/BaseNode';
 import { CustomEdge } from './CustomEdge';
+import { CanvasControls } from './CanvasControls';
 import { PlannerStore } from '../../hooks/usePlannerStore';
 import { NodeAIActionType } from '../nodes/NodeToolbar';
 
 interface PlannerCanvasProps {
   store: PlannerStore;
   onTriggerAIForNode: (nodeId: string, action: NodeAIActionType) => void;
-  zoomInRef?: React.MutableRefObject<() => void>;
-  zoomOutRef?: React.MutableRefObject<() => void>;
-  fitViewRef?: React.MutableRefObject<() => void>;
 }
 
-// Inner component can use useReactFlow because it lives inside ReactFlowProvider
-const CanvasInner: React.FC<PlannerCanvasProps> = ({
-  store,
-  onTriggerAIForNode,
-  zoomInRef,
-  zoomOutRef,
-  fitViewRef
-}) => {
+export const PlannerCanvas: React.FC<PlannerCanvasProps> = ({ store, onTriggerAIForNode }) => {
   const {
     project,
     setProject,
@@ -48,15 +37,6 @@ const CanvasInner: React.FC<PlannerCanvasProps> = ({
     dismissOutdatedStatus,
     setSelectedNodeId
   } = store;
-
-  const { zoomIn, zoomOut, fitView } = useReactFlow();
-
-  // Wire zoom control refs so Header can call them
-  useEffect(() => {
-    if (zoomInRef) zoomInRef.current = () => zoomIn({ duration: 200 });
-    if (zoomOutRef) zoomOutRef.current = () => zoomOut({ duration: 200 });
-    if (fitViewRef) fitViewRef.current = () => fitView({ padding: 0.15, duration: 300 });
-  }, [zoomIn, zoomOut, fitView, zoomInRef, zoomOutRef, fitViewRef]);
 
   const nodeTypes = useMemo(() => ({ plannerNode: BaseNode }), []);
   const edgeTypes = useMemo(() => ({ customEdge: CustomEdge }), []);
@@ -156,50 +136,57 @@ const CanvasInner: React.FC<PlannerCanvasProps> = ({
     setSelectedNodeId(null);
   }, [setSelectedNodeId]);
 
-  return (
-    <ReactFlow
-      nodes={project.nodes as unknown as Node[]}
-      edges={project.edges as unknown as Edge[]}
-      nodeTypes={nodeTypes}
-      edgeTypes={edgeTypes}
-      onNodesChange={onNodesChange}
-      onEdgesChange={onEdgesChange}
-      onConnect={onConnect}
-      onNodeClick={onNodeClick}
-      onPaneClick={onPaneClick}
-      defaultViewport={{ x: 80, y: 80, zoom: 1.2 }}
-      minZoom={0.15}
-      maxZoom={2.0}
-      snapToGrid={project.settings.snapToGrid}
-      snapGrid={[16, 16]}
-      defaultEdgeOptions={{
-        type: 'customEdge',
-        animated: true
-      }}
-    >
-      <Background variant={BackgroundVariant.Dots} gap={20} size={1.2} color="#334155" />
-      <Controls
-        className="!bg-slate-900 !border !border-slate-800 !rounded-lg !shadow-xl !fill-slate-300"
-        showInteractive={false}
-      />
-      <MiniMap
-        className="!bg-slate-900/90 !border !border-slate-800 !rounded-lg !shadow-2xl"
-        nodeColor="#1e293b"
-        maskColor="rgba(15, 23, 42, 0.75)"
-        zoomable
-        pannable
-      />
-    </ReactFlow>
-  );
-};
+  // Auto layout function to tidy up nodes neatly in columns/grid
+  const handleAutoLayout = useCallback(() => {
+    const updatedNodes = project.nodes.map((n, idx) => ({
+      ...n,
+      position: {
+        x: 80 + (idx % 3) * 480,
+        y: 80 + Math.floor(idx / 3) * 400
+      }
+    }));
+    setProject({
+      ...project,
+      nodes: updatedNodes
+    });
+  }, [project, setProject]);
 
-// Outer component wraps in ReactFlowProvider so useReactFlow works inside
-export const PlannerCanvas: React.FC<PlannerCanvasProps> = (props) => {
   return (
     <div className="w-full h-full relative bg-slate-950">
-      <ReactFlowProvider>
-        <CanvasInner {...props} />
-      </ReactFlowProvider>
+      <ReactFlow
+        nodes={project.nodes as unknown as Node[]}
+        edges={project.edges as unknown as Edge[]}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onNodeClick={onNodeClick}
+        onPaneClick={onPaneClick}
+        defaultViewport={{ x: 120, y: 80, zoom: 1 }}
+        minZoom={0.2}
+        maxZoom={2.5}
+        snapToGrid={project.settings.snapToGrid}
+        snapGrid={[16, 16]}
+        defaultEdgeOptions={{
+          type: 'customEdge',
+          animated: true
+        }}
+      >
+        <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#334155" />
+        
+        {/* Prominent Zoom & View Controls */}
+        <CanvasControls onAutoLayout={handleAutoLayout} />
+
+        {/* MiniMap on top-right or bottom-right */}
+        <MiniMap
+          className="!bg-slate-900/95 !border !border-slate-800 !rounded-xl !shadow-2xl"
+          nodeColor="#334155"
+          maskColor="rgba(15, 23, 42, 0.85)"
+          zoomable
+          pannable
+        />
+      </ReactFlow>
     </div>
   );
 };
