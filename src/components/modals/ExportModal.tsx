@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { ProjectSchema } from '../../types/project';
 import {
   generateAllExportFiles,
@@ -20,7 +20,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   project,
   onImportProject
 }) => {
-  const [activeTab, setActiveTab] = useState<'ai_context' | 'agents' | 'tasks' | 'json'>('ai_context');
+  const [activeTab, setActiveTab] = useState<'handoff' | 'design_brief' | 'ux_spec' | 'ai_context' | 'agents' | 'tasks' | 'json'>('handoff');
   const [selectedAgentFile, setSelectedAgentFile] = useState<'AGENTS.md' | 'CLAUDE.md' | 'GEMINI.md'>('AGENTS.md');
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [importError, setImportError] = useState('');
@@ -94,58 +94,130 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-slate-800 bg-slate-950/50 px-4 gap-2 text-xs">
-          <button
-            onClick={() => setActiveTab('ai_context')}
-            className={`py-2.5 px-3 font-semibold border-b-2 transition cursor-pointer ${
-              activeTab === 'ai_context'
-                ? 'border-brand-400 text-brand-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            AI_CONTEXT.md
-          </button>
-          <button
-            onClick={() => setActiveTab('agents')}
-            className={`py-2.5 px-3 font-semibold border-b-2 transition cursor-pointer ${
-              activeTab === 'agents'
-                ? 'border-brand-400 text-brand-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Agent Directives (CLAUDE/GEMINI)
-          </button>
-          <button
-            onClick={() => setActiveTab('tasks')}
-            className={`py-2.5 px-3 font-semibold border-b-2 transition cursor-pointer ${
-              activeTab === 'tasks'
-                ? 'border-brand-400 text-brand-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Task Cards ({Object.keys(bundle.tasks).length})
-          </button>
-          <button
-            onClick={() => setActiveTab('json')}
-            className={`py-2.5 px-3 font-semibold border-b-2 transition cursor-pointer ${
-              activeTab === 'json'
-                ? 'border-brand-400 text-brand-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Project JSON (Import / Export)
-          </button>
+        <div className="flex border-b border-slate-800 bg-slate-950/50 px-4 gap-1 text-xs overflow-x-auto">
+          {([
+            { id: 'handoff', label: 'HANDOFF.md ⭐' },
+            { id: 'design_brief', label: 'DESIGN_BRIEF.md' },
+            { id: 'ux_spec', label: 'UX_SPEC.md' },
+            { id: 'ai_context', label: 'AI_CONTEXT.md' },
+            { id: 'agents', label: 'Agent Directives' },
+            { id: 'tasks', label: `Tasks (${Object.keys(bundle.tasks).length})` },
+            { id: 'json', label: 'JSON Import/Export' }
+          ] as const).map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`py-2.5 px-3 font-semibold border-b-2 transition cursor-pointer whitespace-nowrap ${
+                activeTab === id
+                  ? 'border-brand-400 text-brand-400'
+                  : 'border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Tab Content */}
         <div className="flex-1 overflow-y-auto p-4 bg-slate-950">
-          {/* TAB 1: AI_CONTEXT.md */}
+          {/* TAB: HANDOFF.md */}
+          {activeTab === 'handoff' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 text-[11px]">
+                  Complete AI Coding Handoff: Product Context + UX + Design Intent + Visual Verification Loop + Design Judgment Gate.
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copyToClipboard(bundle['HANDOFF.md'], 'handoff')}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition cursor-pointer"
+                  >
+                    {copiedKey === 'handoff' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedKey === 'handoff' ? 'Copied!' : 'Copy Markdown'}</span>
+                  </button>
+                  <button
+                    onClick={() => downloadFile('HANDOFF.md', bundle['HANDOFF.md'])}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-brand-500 hover:bg-brand-400 text-slate-950 font-semibold transition cursor-pointer"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+              <pre className="p-4 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[50vh]">
+                {bundle['HANDOFF.md']}
+              </pre>
+            </div>
+          )}
+
+          {/* TAB: DESIGN_BRIEF.md */}
+          {activeTab === 'design_brief' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 text-[11px]">
+                  Synthesized Design Intent Brief: North Star, metaphor, hierarchy, anti-patterns & visual acceptance criteria.
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copyToClipboard(bundle['DESIGN_BRIEF.md'], 'design_brief')}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition cursor-pointer"
+                  >
+                    {copiedKey === 'design_brief' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedKey === 'design_brief' ? 'Copied!' : 'Copy Markdown'}</span>
+                  </button>
+                  <button
+                    onClick={() => downloadFile('DESIGN_BRIEF.md', bundle['DESIGN_BRIEF.md'])}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-brand-500 hover:bg-brand-400 text-slate-950 font-semibold transition cursor-pointer"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+              <pre className="p-4 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[50vh]">
+                {bundle['DESIGN_BRIEF.md']}
+              </pre>
+            </div>
+          )}
+
+          {/* TAB: UX_SPEC.md */}
+          {activeTab === 'ux_spec' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400 text-[11px]">
+                  User journey, screen flows, information architecture, and behavioral state guidelines.
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copyToClipboard(bundle['UX_SPEC.md'], 'ux_spec')}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 transition cursor-pointer"
+                  >
+                    {copiedKey === 'ux_spec' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedKey === 'ux_spec' ? 'Copied!' : 'Copy Markdown'}</span>
+                  </button>
+                  <button
+                    onClick={() => downloadFile('UX_SPEC.md', bundle['UX_SPEC.md'])}
+                    className="flex items-center gap-1 text-[11px] px-2.5 py-1 rounded bg-brand-500 hover:bg-brand-400 text-slate-950 font-semibold transition cursor-pointer"
+                  >
+                    <Download className="w-3 h-3" />
+                    <span>Download</span>
+                  </button>
+                </div>
+              </div>
+              <pre className="p-4 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-[50vh]">
+                {bundle['UX_SPEC.md']}
+              </pre>
+            </div>
+          )}
+
+          {/* TAB: AI_CONTEXT.md */}
           {activeTab === 'ai_context' && (
             <div className="space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400 text-[11px]">
                   Universal context file capturing the entire graph state.
                 </span>
+
                 <div className="flex gap-2">
                   <button
                     onClick={() => copyToClipboard(bundle['AI_CONTEXT.md'], 'ai_context')}

@@ -1,5 +1,5 @@
-﻿import { useState, useCallback, useRef, useEffect } from 'react';
-import { ProjectSchema } from '../types/project';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { ProjectSchema, DesignIntentData } from '../types/project';
 import { PlannerNode, NodeType, PlannerNodeData, NodeStatus } from '../types/node';
 import { PlannerEdge, EdgeType } from '../types/edge';
 import { AIProposal } from '../types/ai';
@@ -24,6 +24,7 @@ export interface PlannerStore {
   setSelectedNodeId: (id: string | null) => void;
   setProject: (newProject: ProjectSchema) => void;
   applyProposal: (proposal: AIProposal) => void;
+  updateDesignIntent: (designIntent: DesignIntentData) => void;
   dismissOutdatedStatus: (nodeId: string) => void;
   undo: () => void;
   redo: () => void;
@@ -369,6 +370,11 @@ export function usePlannerStore(initialProject?: ProjectSchema): PlannerStore {
     setProjectInternal(next);
   }, [future]);
 
+  const updateDesignIntent = useCallback((designIntent: DesignIntentData) => {
+    pushHistory(projectRef.current);
+    setProjectInternal((prev) => ({ ...prev, designIntent }));
+  }, [pushHistory]);
+
   return {
     project,
     canUndo: past.length > 0,
@@ -386,8 +392,10 @@ export function usePlannerStore(initialProject?: ProjectSchema): PlannerStore {
     setSelectedNodeId,
     setProject,
     applyProposal,
+    updateDesignIntent,
     dismissOutdatedStatus,
     undo,
     redo
   };
 }
+

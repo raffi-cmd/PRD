@@ -1,4 +1,4 @@
-﻿import { NodeType, NodeTypeConfig } from '../types/node';
+import { NodeType, NodeTypeConfig } from '../types/node';
 
 export const NODE_CONFIGS: Record<NodeType, NodeTypeConfig> = {
   // PLANNING
@@ -187,6 +187,19 @@ export const NODE_CONFIGS: Record<NodeType, NodeTypeConfig> = {
     iconName: 'Component',
     defaultTitle: 'Component Inventory',
     defaultContent: '### Reusable Components\n- `Button`: Primary, secondary, outline, danger\n- `Modal`: Base dialog with keyboard trapping\n- `Card`: Canvas draggable container'
+  },
+  design_intent: {
+    type: 'design_intent',
+    category: 'product',
+    label: 'Design Intent',
+    shortDescription: 'Personality, visual metaphor, layout, anti-patterns, & acceptance criteria',
+    color: 'violet',
+    accentBg: 'bg-violet-500/10 text-violet-400 border-violet-500/30',
+    borderColor: 'border-violet-500/40',
+    badgeBg: 'bg-violet-500/20 text-violet-300',
+    iconName: 'Palette',
+    defaultTitle: 'Design Intent & Visual Direction',
+    defaultContent: '## 1. Product Personality\n- Traits: Practical, technical, trustworthy\n- Feeling: Utility tool designed for precision rather than marketing hype.\n\n## 2. Visual Direction & Metaphor\n- Aesthetic Direction: Editorial utility\n- Visual Metaphor: Developer workstation & technical terminal\n- Hierarchy Priorities: 1. Primary Action/Result, 2. Secondary Data, 3. Helper Context\n\n## 3. Layout & Typography Strategy\n- Desktop vs Mobile: Two-column workspace on desktop -> Single-column stacked workflow on mobile\n- Typography Communication: Monospace for data/code blocks; clear geometric sans for UI text.\n\n## 4. Anti-Patterns & Visual Acceptance Criteria\n- Anti-Patterns: No arbitrary gradients, no card soup, no decorative icons without semantic purpose.\n- Visual Acceptance Criteria: Interface must feel like a dedicated developer tool; total/primary output dominates visually.'
   },
 
   // EXECUTION

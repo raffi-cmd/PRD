@@ -1,4 +1,4 @@
-﻿import { NodeType } from '../../types/node';
+import { NodeType } from '../../types/node';
 import { AIContextSnippet } from '../../types/ai';
 
 export const SYSTEM_ARCHITECT_PROMPT = `You are a Senior Principal Software Architect, Principal Product Manager, and AI Coding Strategist.
@@ -73,6 +73,13 @@ Generate a JSON object matching this EXACT structure (valid JSON, no surrounding
       "status": "draft"
     },
     {
+      "id": "node-designintent",
+      "type": "design_intent",
+      "title": "Design North Star & Visual Intent",
+      "content": "## Design North Star\n[AI SUGGESTION] Define the single sentence describing visual character.\n\n## Visual Metaphor & Direction\n- Direction: Editorial Utility\n- Metaphor: Domain Workbench\n- Anti-Patterns: No generic SaaS dashboard clichés, no card soup, no gradient blobs.",
+      "status": "draft"
+    },
+    {
       "id": "node-tasks",
       "type": "tasks",
       "title": "Development Tasks & Execution Plan",
@@ -109,8 +116,9 @@ Generate a JSON object matching this EXACT structure (valid JSON, no surrounding
     { "source": "node-arch", "target": "node-datamodel", "type": "dependency" },
     { "source": "node-arch", "target": "node-api", "type": "dependency" },
     { "source": "node-prd", "target": "node-uiux", "type": "implements" },
+    { "source": "node-uiux", "target": "node-designintent", "type": "implements" },
+    { "source": "node-designintent", "target": "node-tasks", "type": "implements" },
     { "source": "node-api", "target": "node-tasks", "type": "implements" },
-    { "source": "node-uiux", "target": "node-tasks", "type": "implements" },
     { "source": "node-tasks", "target": "node-testplan", "type": "dependency" },
     { "source": "node-testplan", "target": "node-validation", "type": "dependency" },
     { "source": "node-validation", "target": "node-aicontext", "type": "implements" }

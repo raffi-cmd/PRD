@@ -12,6 +12,7 @@ import { ValidationDrawer } from './components/modals/ValidationDrawer';
 import { ExportModal } from './components/modals/ExportModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { CommandPalette } from './components/modals/CommandPalette';
+import { DesignIntentModule } from './components/design/DesignIntentModule';
 
 import { NodeType, PlannerNode } from './types/node';
 import { PlannerEdge } from './types/edge';
@@ -24,6 +25,9 @@ import { getUpstreamContext } from './services/ai/contextBuilder';
 import { getAIProvider, computeLineDiff } from './services/ai/provider';
 import { buildContextualNodePrompt, SYSTEM_ARCHITECT_PROMPT } from './services/ai/prompts';
 import { loadLastActiveProject, saveProjectToDB } from './services/storage/indexedDb';
+import { generateAICodingHandoffMarkdown } from './services/export/aiCodingHandoffGenerator';
+
+export type ActiveView = 'canvas' | 'design' | 'handoff';
 
 export const App: React.FC = () => {
   const store = usePlannerStore();
@@ -38,11 +42,15 @@ export const App: React.FC = () => {
     redo,
     selectedNodeId,
     impactedNodeIds,
-    applyProposal
+    applyProposal,
+    updateDesignIntent
   } = store;
 
   // Auto-save state
   const saveStatus = useAutoSave(project, project.settings.autoSave);
+
+  // Active view (canvas / design intent / handoff preview)
+  const [activeView, setActiveView] = useState<ActiveView>('canvas');
 
   // Modals & Panels state
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -266,42 +274,89 @@ export const App: React.FC = () => {
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
         healthReport={healthReport}
+        activeView={activeView}
+        onSetActiveView={setActiveView}
       />
 
-      {/* Main Workspace: Left Sidebar + Canvas */}
+      {/* Main Workspace */}
       <div className="flex-1 flex relative overflow-hidden">
-        {/* Collapsible Node Catalog Sidebar */}
-        <NodePalette
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          onAddNode={(type: NodeType) => {
-            addNode(type);
-            showToast(`Added ${type} node to canvas`);
-          }}
-        />
+        {/* Canvas View */}
+        {activeView === 'canvas' && (
+          <>
+            {/* Collapsible Node Catalog Sidebar */}
+            <NodePalette
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              onAddNode={(type: NodeType) => {
+                addNode(type);
+                showToast(`Added ${type} node to canvas`);
+              }}
+            />
 
-        {/* Node Canvas */}
-        <main className="flex-1 relative h-full">
-          <PlannerCanvas store={store} onTriggerAIForNode={handleTriggerAIForNode} />
+            {/* Node Canvas */}
+            <main className="flex-1 relative h-full">
+              <PlannerCanvas store={store} onTriggerAIForNode={handleTriggerAIForNode} />
 
-          {/* Toast Notification */}
-          {toastMessage && (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg shadow-2xl backdrop-blur animate-in fade-in duration-150">
-              {toastMessage}
+              {/* Toast Notification */}
+              {toastMessage && (
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg shadow-2xl backdrop-blur animate-in fade-in duration-150">
+                  {toastMessage}
+                </div>
+              )}
+
+              {/* Downstream Impact Alert Panel */}
+              <ImpactPanel
+                impactedNodes={impactedNodes}
+                onSelectNode={(id) => store.setSelectedNodeId(id)}
+                onClear={() => {
+                  for (const n of impactedNodes) {
+                    store.dismissOutdatedStatus(n.id);
+                  }
+                }}
+              />
+            </main>
+          </>
+        )}
+
+        {/* Design Intent View */}
+        {activeView === 'design' && (
+          <main className="flex-1 relative h-full overflow-hidden">
+            <DesignIntentModule
+              project={project}
+              onUpdateDesignIntent={updateDesignIntent}
+            />
+            {toastMessage && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg shadow-2xl backdrop-blur">
+                {toastMessage}
+              </div>
+            )}
+          </main>
+        )}
+
+        {/* Handoff Preview */}
+        {activeView === 'handoff' && (
+          <main className="flex-1 relative h-full overflow-auto bg-slate-950 p-6">
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-sm font-semibold text-slate-200">AI Coding Handoff Preview</h2>
+                <button
+                  onClick={() => setIsExportOpen(true)}
+                  className="px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-slate-950 font-semibold text-xs transition cursor-pointer"
+                >
+                  Open Export Hub →
+                </button>
+              </div>
+              <pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs whitespace-pre-wrap leading-relaxed overflow-x-auto">
+                {generateAICodingHandoffMarkdown(project)}
+              </pre>
             </div>
-          )}
-
-          {/* Downstream Impact Alert Panel */}
-          <ImpactPanel
-            impactedNodes={impactedNodes}
-            onSelectNode={(id) => store.setSelectedNodeId(id)}
-            onClear={() => {
-              for (const n of impactedNodes) {
-                store.dismissOutdatedStatus(n.id);
-              }
-            }}
-          />
-        </main>
+            {toastMessage && (
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg shadow-2xl backdrop-blur">
+                {toastMessage}
+              </div>
+            )}
+          </main>
+        )}
       </div>
 
       {/* Modals */}

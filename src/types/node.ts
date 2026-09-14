@@ -1,4 +1,4 @@
-﻿export type NodeCategory = 'planning' | 'technical' | 'product' | 'execution' | 'ai';
+export type NodeCategory = 'planning' | 'technical' | 'product' | 'execution' | 'ai';
 
 export type NodeType =
   // Planning
@@ -18,6 +18,7 @@ export type NodeType =
   | 'ui_ux'
   | 'user_flow'
   | 'components'
+  | 'design_intent'
   // Execution
   | 'tasks'
   | 'dependencies'

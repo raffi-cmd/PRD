@@ -1,4 +1,4 @@
-import { ProjectSchema } from '../../types/project';
+import { ProjectSchema, DesignIntentData } from '../../types/project';
 import { PlannerNode } from '../../types/node';
 import { PlannerEdge } from '../../types/edge';
 
@@ -7,6 +7,161 @@ function getInitialApiKey(): string {
     return localStorage.getItem('vibe_gemini_api_key') || '';
   }
   return '';
+}
+
+export function createDefaultDesignIntent(): DesignIntentData {
+  return {
+    projectType: 'new_project',
+    northStar: {
+      statement: 'Technical, calm, information-dense, and precise — like a professional engineering workspace rather than a generic SaaS dashboard.',
+      status: 'default',
+      aiSuggestion: 'Compact utility tool with sharp hierarchy, restrained colors, and high data density.'
+    },
+    visualDirection: {
+      direction: 'editorial utility',
+      rationale: 'High information density with clear typography and structured sections for fast visual scanning.',
+      status: 'default'
+    },
+    visualMetaphor: {
+      metaphor: 'Developer terminal + technical documentation workbook',
+      impact: 'Drives crisp grid lines, deliberate contrast, and functional typography over decorative cards.',
+      status: 'default'
+    },
+    visualReferences: [
+      {
+        id: 'ref-default-1',
+        title: 'Developer Terminal & Workbench',
+        notes: 'Clean monospace tables, clear visual priority, zero decorative gradients',
+        whatToBorrow: ['Data density', 'Monospace typography for IDs/code', 'High contrast border hierarchy'],
+        whatNotToCopy: ['Exact proprietary layout', 'Branding elements', 'Monochrome dullness'],
+        analysis: {
+          layout: 'Split-pane master/detail composition',
+          density: 'High (compact data rows)',
+          typography: 'Geometric sans headings + tabular monospace data',
+          radius: 'Restrained (4px - 6px)',
+          borders: 'Subtle slate borders (1px)',
+          color: 'Dark slate surfaces with purposeful teal accent',
+          hierarchy: 'Primary result immediately prominent at top-left',
+          interaction: 'Instant keyboard shortcuts and zero motion latency'
+        }
+      }
+    ],
+    layoutStrategy: {
+      containerWidth: 'Max-width 1280px with narrow centered utility shells',
+      gridAndColumns: 'Two-column split view on desktop (Input/Canvas + Result/Context)',
+      focalPoint: 'Primary calculated result / central canvas',
+      desktop: 'Two-column split view (Input/Canvas + Result/Context)',
+      mobile: 'Linear stacked step-by-step navigation',
+      relationships: 'Input directly updates output without disruptive modal context switches.',
+      whitespacePhilosophy: 'Intentional around primary content, minimal between related utility controls.',
+      status: 'default'
+    },
+    typography: {
+      display: 'Clean geometric sans with strict weight hierarchy',
+      body: 'Highly readable neutral sans (Inter / system sans)',
+      numericData: 'Tabular monospace for statistics, timestamps, metrics, and identifiers',
+      hierarchyScale: 'Display: 20-24px, Headings: 14-16px, Body: 13px, Caption/Meta: 11px',
+      communicationStyle: 'dense and utilitarian',
+      monospaceUsage: 'Use monospace selectively for data schemas, code snippets, and structural IDs.',
+      details: 'Clean geometric sans for primary UI text with strict size hierarchy.',
+      status: 'default'
+    },
+    color: {
+      primaryRole: 'Deep slate background with crisp light gray typography',
+      accentRole: 'Teal/Cyan highlight for active elements and key metrics',
+      surfaceCharacter: 'Subtle dark borders with dark slate surfaces',
+      contrastExpectations: 'High contrast (WCAG AAA compliant text) for optimal readability.',
+      status: 'default'
+    },
+    components: {
+      generalCharacter: 'restrained and functional',
+      borderTreatment: 'Subtle 1px slate-800 borders to define regions',
+      radius: 'Small to medium (rounded-lg 8px), never pill-soup',
+      shadows: 'Minimal subtle elevation only for floating overlays/drawers',
+      cards: 'Use sparingly; avoid card soup.',
+      buttons: 'Primary action visually dominates secondary utility buttons.',
+      inputs: 'Feel like utility controls with explicit state feedback.',
+      icons: 'Functional only for scanning; no decorative icon spam.',
+      status: 'default'
+    },
+    interaction: {
+      philosophy: ['immediate feedback', 'direct manipulation', 'keyboard-friendly'],
+      motionIntensity: 'Subtle & instantaneous (<150ms), zero decorative bounce',
+      motionAndStates: 'Subtle instantaneous state transitions without excessive delays.',
+      status: 'default'
+    },
+    density: {
+      level: 'balanced',
+      rules: 'Results and technical data dense; primary controls and onboarding spacious.',
+      status: 'default'
+    },
+    responsiveIntent: {
+      breakpointRules: 'Desktop side-by-side collapses into logical stacked workflow on mobile.',
+      mobilePriority: 'Primary output and core input action remain visible without horizontal scroll.',
+      status: 'default'
+    },
+    accessibility: {
+      requirements: [
+        'Visible focus outlines on keyboard navigation',
+        'WCAG AA contrast ratios',
+        'Semantic HTML layout elements',
+        'Screen reader accessible labels',
+        'Reduced motion query support'
+      ],
+      status: 'default'
+    },
+    antiPatterns: {
+      forbidden: [
+        'generic SaaS dashboard clichés',
+        'excessive rounded cards / card soup',
+        'gradient-heavy UI without semantic meaning',
+        'glassmorphism or heavy blur effects',
+        'decorative icons lacking purpose',
+        'meaningless pill badges on every label',
+        'fake AI sparkles and floating animations'
+      ],
+      overcorrectionWarning: 'Avoiding gradients or cards does not mean making the UI flat or monochrome.',
+      status: 'default'
+    },
+    visualAcceptanceCriteria: {
+      criteria: [
+        'The primary output/result is immediately recognizable and visually dominant at a 2-second glance.',
+        'The design does not resemble a generic AI-generated SaaS template.',
+        'Keyboard navigation allows full operation without mouse interaction.',
+        'Desktop and mobile viewports maintain visual hierarchy without stacked chaos.'
+      ],
+      status: 'default'
+    },
+    constraints: {
+      technical: ['React 18 + TypeScript strict mode', 'Zero heavy runtime CSS libraries; pure Tailwind CSS'],
+      component: ['Reuse existing primitive buttons/inputs', 'Keep dialogs accessible with Escape trap'],
+      responsive: ['Desktop 1280px+, Tablet 768px, Mobile 390px support'],
+      accessibility: ['Visible keyboard focus indicator', 'WCAG AAA text contrast on dark backgrounds'],
+      thingsToAvoid: ['No arbitrary rainbow colors', 'No infinite spinner blocks without error fallback']
+    },
+    critiqueChecklist: [
+      { id: 'crit-1', priority: 'P0', title: 'Functional & Layout Integrity', description: 'No layout breakage, no text overflow, interactive controls fully reachable', resolved: true },
+      { id: 'crit-2', priority: 'P1', title: 'Visual Hierarchy & Focal Point', description: 'Primary output visually leads the screen; secondary controls do not compete', resolved: true },
+      { id: 'crit-3', priority: 'P1', title: 'Intentional Spacing & Density', description: 'Whitespace is deliberate, not mechanical copy-paste', resolved: true },
+      { id: 'crit-4', priority: 'P2', title: 'Micro-Polish & Alignment', description: 'Subtle borders, consistent padding, crisp typography hierarchy', resolved: true }
+    ],
+    provenance: {
+      northStar: 'default',
+      visualDirection: 'default',
+      visualMetaphor: 'default',
+      visualReferences: 'default',
+      layoutStrategy: 'default',
+      typography: 'default',
+      color: 'default',
+      components: 'default',
+      interaction: 'default',
+      density: 'default',
+      responsiveIntent: 'default',
+      accessibility: 'default',
+      antiPatterns: 'default',
+      visualAcceptanceCriteria: 'default'
+    }
+  };
 }
 
 export function createDefaultProject(title = 'My New Project', description = 'Visual AI project plan'): ProjectSchema {
@@ -41,7 +196,7 @@ export function createDefaultProject(title = 'My New Project', description = 'Vi
   ];
 
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     project: {
       id: projectId,
       name: title,
@@ -62,12 +217,13 @@ export function createDefaultProject(title = 'My New Project', description = 'Vi
       autoSave: true,
       snapToGrid: true,
       theme: 'dark'
-    }
+    },
+    designIntent: createDefaultDesignIntent()
   };
 }
 
 export function exportProjectToJSON(project: ProjectSchema): string {
-  return JSON.stringify(project, null, 2);
+  return JSON.stringify({ ...project, schemaVersion: 2 }, null, 2);
 }
 
 export function parseProjectJSON(jsonString: string): ProjectSchema {
@@ -128,7 +284,7 @@ export function parseProjectJSON(jsonString: string): ProjectSchema {
     : [];
 
   return {
-    schemaVersion: candidate.schemaVersion || 1,
+    schemaVersion: 2,
     project: {
       id: candidate.project.id || 'proj-' + Date.now(),
       name: candidate.project.name,
@@ -149,6 +305,11 @@ export function parseProjectJSON(jsonString: string): ProjectSchema {
       autoSave: candidate.settings?.autoSave ?? true,
       snapToGrid: candidate.settings?.snapToGrid ?? true,
       theme: candidate.settings?.theme || 'dark'
-    }
+    },
+    designIntent: candidate.designIntent ? {
+      ...createDefaultDesignIntent(),
+      ...candidate.designIntent
+    } : createDefaultDesignIntent()
   };
 }
+

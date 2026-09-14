@@ -1,7 +1,13 @@
-﻿import { ProjectSchema } from '../../types/project';
+import { ProjectSchema } from '../../types/project';
 import { PlannerNode } from '../../types/node';
+import { generateDesignBriefMarkdown } from './designBriefGenerator';
+import { generateAICodingHandoffMarkdown } from './aiCodingHandoffGenerator';
+import { generateUXSpecMarkdown } from './uxSpecGenerator';
 
 export interface ExportFilesBundle {
+  'HANDOFF.md': string;
+  'DESIGN_BRIEF.md': string;
+  'UX_SPEC.md': string;
   'AI_CONTEXT.md': string;
   'AGENTS.md': string;
   'CLAUDE.md': string;
@@ -10,6 +16,9 @@ export interface ExportFilesBundle {
 }
 
 export function generateAllExportFiles(project: ProjectSchema): ExportFilesBundle {
+  const handoffMd = generateAICodingHandoffMarkdown(project);
+  const designBriefMd = generateDesignBriefMarkdown(project);
+  const uxSpecMd = generateUXSpecMarkdown(project);
   const aiContext = generateAIContextMarkdown(project);
   const agentsMd = generateAgentsMarkdown(project);
   const claudeMd = generateClaudeMarkdown(project);
@@ -17,6 +26,9 @@ export function generateAllExportFiles(project: ProjectSchema): ExportFilesBundl
   const tasks = generateIndividualTaskFiles(project);
 
   return {
+    'HANDOFF.md': handoffMd,
+    'DESIGN_BRIEF.md': designBriefMd,
+    'UX_SPEC.md': uxSpecMd,
     'AI_CONTEXT.md': aiContext,
     'AGENTS.md': agentsMd,
     'CLAUDE.md': claudeMd,
