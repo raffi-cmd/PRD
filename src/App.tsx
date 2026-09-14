@@ -13,6 +13,7 @@ import { ExportModal } from './components/modals/ExportModal';
 import { SettingsModal } from './components/modals/SettingsModal';
 import { CommandPalette } from './components/modals/CommandPalette';
 import { DesignIntentModule } from './components/design/DesignIntentModule';
+import { HandoffView } from './components/handoff/HandoffView';
 
 import { NodeType, PlannerNode } from './types/node';
 import { PlannerEdge } from './types/edge';
@@ -83,10 +84,10 @@ export const App: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   }, []);
 
-  // Validation report calculation
+  // Planning Readiness report calculation
   const healthReport = useMemo(
-    () => validateProjectGraph(project.nodes, project.edges),
-    [project.nodes, project.edges]
+    () => validateProjectGraph(project.nodes, project.edges, project.designIntent),
+    [project.nodes, project.edges, project.designIntent]
   );
 
   // Downstream impacted nodes calculation
@@ -333,23 +334,14 @@ export const App: React.FC = () => {
           </main>
         )}
 
-        {/* Handoff Preview */}
+        {/* Handoff View */}
         {activeView === 'handoff' && (
-          <main className="flex-1 relative h-full overflow-auto bg-slate-950 p-6">
-            <div className="max-w-4xl mx-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-sm font-semibold text-slate-200">AI Coding Handoff Preview</h2>
-                <button
-                  onClick={() => setIsExportOpen(true)}
-                  className="px-3 py-1.5 rounded-lg bg-brand-500 hover:bg-brand-400 text-slate-950 font-semibold text-xs transition cursor-pointer"
-                >
-                  Open Export Hub →
-                </button>
-              </div>
-              <pre className="p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-300 font-mono text-xs whitespace-pre-wrap leading-relaxed overflow-x-auto">
-                {generateAICodingHandoffMarkdown(project)}
-              </pre>
-            </div>
+          <main className="flex-1 relative h-full overflow-hidden">
+            <HandoffView
+              project={project}
+              onOpenExportModal={() => setIsExportOpen(true)}
+              onShowToast={showToast}
+            />
             {toastMessage && (
               <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 border border-slate-700 text-slate-200 text-xs px-4 py-2 rounded-lg shadow-2xl backdrop-blur">
                 {toastMessage}

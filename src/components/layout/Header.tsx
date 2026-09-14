@@ -213,15 +213,15 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="hidden sm:inline">Generate Plan</span>
         </button>
 
-        {/* Health Score & Validation */}
+        {/* Project Planning Readiness & Validation */}
         <button
           onClick={onOpenValidation}
           className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border transition cursor-pointer ${getHealthBadgeColor(
             healthReport.score
           )}`}
-          title="Project Health & Validation"
+          title="Project Planning Readiness Breakdown"
         >
-          <span>Health:</span>
+          <span>Readiness:</span>
           <span className="font-bold">{healthReport.score}%</span>
         </button>
 

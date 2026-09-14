@@ -1,8 +1,19 @@
-﻿import { PlannerNode } from '../../types/node';
+import { PlannerNode } from '../../types/node';
 import { PlannerEdge } from '../../types/edge';
-import { HealthReport, ValidationFinding, HealthCheckItem } from '../../types/validation';
+import { DesignIntentData } from '../../types/project';
+import {
+  HealthReport,
+  ValidationFinding,
+  HealthCheckItem,
+  ReadinessCategory,
+  ReadinessCategoryBreakdown
+} from '../../types/validation';
 
-export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[]): HealthReport {
+export function validateProjectGraph(
+  nodes: PlannerNode[],
+  edges: PlannerEdge[],
+  designIntent?: DesignIntentData
+): HealthReport {
   const findings: ValidationFinding[] = [];
   const checks: HealthCheckItem[] = [];
 
@@ -14,54 +25,48 @@ export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[])
     nodeTypeMap.set(type, list);
   }
 
-  // Check 1: Idea (15)
+  // ==========================================
+  // 1. PRODUCT READINESS CHECKS
+  // ==========================================
   const ideaNodes = nodeTypeMap.get('idea') || [];
   const hasIdea = ideaNodes.some((n) => n.data.content.trim().length > 20);
   checks.push({
     id: 'check-idea',
-    label: 'Project Idea defined',
+    category: 'product',
+    label: 'Project Idea & Vision defined',
     passed: hasIdea,
-    detail: hasIdea ? 'Core vision is documented.' : 'Add an Idea node with a clear goal and problem description.',
+    detail: hasIdea ? 'Core vision and problem are documented.' : 'Add an Idea node with a clear goal and problem description.',
     weight: 15
   });
   if (!hasIdea) {
     findings.push({
       id: 'finding-idea',
       severity: 'ERROR',
-      title: 'Missing Project Idea',
+      title: 'Missing Project Vision',
       message: 'The project lacks a defined core idea. All planning should stem from an initial concept.',
       fixActionLabel: 'Create Idea Node'
     });
   }
 
-  // Check 2: Requirements (10)
   const reqNodes = nodeTypeMap.get('requirements') || [];
   const hasReqs = reqNodes.some((n) => n.data.content.trim().length > 30);
   checks.push({
     id: 'check-reqs',
-    label: 'Requirements specified',
+    category: 'product',
+    label: 'Functional & Non-Functional Requirements',
     passed: hasReqs,
-    detail: hasReqs ? 'Functional & non-functional requirements present.' : 'Requirements node is missing or empty.',
+    detail: hasReqs ? 'Requirements and boundaries present.' : 'Add or expand Requirements node.',
     weight: 10
   });
-  if (!hasReqs) {
-    findings.push({
-      id: 'finding-reqs',
-      severity: 'WARNING',
-      title: 'Requirements Undefined',
-      message: 'Without documented requirements, architectural decisions lack clear constraints.',
-      fixActionLabel: 'Add Requirements'
-    });
-  }
 
-  // Check 3: PRD (15)
   const prdNodes = nodeTypeMap.get('prd') || [];
   const hasPrd = prdNodes.some((n) => n.data.content.trim().length > 50);
   checks.push({
     id: 'check-prd',
-    label: 'PRD complete',
+    category: 'product',
+    label: 'Product Requirements Document (PRD)',
     passed: hasPrd,
-    detail: hasPrd ? 'PRD with goals and acceptance criteria exists.' : 'Add a PRD node to anchor feature definitions.',
+    detail: hasPrd ? 'PRD with goals and feature definitions exists.' : 'Add a PRD node to anchor specifications.',
     weight: 15
   });
   if (!hasPrd) {
@@ -69,73 +74,115 @@ export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[])
       id: 'finding-prd',
       severity: 'WARNING',
       title: 'PRD Missing or Incomplete',
-      message: 'A Product Requirements Document ensures all team members and coding agents align on scope.',
+      message: 'A Product Requirements Document ensures all coding agents align on functional scope.',
       fixActionLabel: 'Generate PRD'
     });
   }
 
-  // Check 4: Architecture (15)
+  // ==========================================
+  // 2. UX READINESS CHECKS
+  // ==========================================
+  const uiuxNodes = nodeTypeMap.get('ui_ux') || [];
+  const userFlowNodes = nodeTypeMap.get('user_flow') || [];
+  const hasUX = uiuxNodes.some((n) => n.data.content.trim().length > 30) || userFlowNodes.length > 0;
+  checks.push({
+    id: 'check-ux-flow',
+    category: 'ux',
+    label: 'User Flow & Screen Specifications',
+    passed: hasUX,
+    detail: hasUX ? 'Screen flows and UX specifications mapped.' : 'Document key user flows and screen interactions.',
+    weight: 15
+  });
+
+  // ==========================================
+  // 3. DESIGN INTENT READINESS CHECKS
+  // ==========================================
+  const hasNorthStar = !!(designIntent?.northStar?.statement && designIntent.northStar.statement.trim().length > 15);
+  checks.push({
+    id: 'check-north-star',
+    category: 'design',
+    label: 'Design North Star established',
+    passed: hasNorthStar,
+    detail: hasNorthStar ? `"${designIntent?.northStar?.statement?.slice(0, 45)}..."` : 'Define the single guiding sentence for emotional/visual character.',
+    weight: 15
+  });
+
+  const hasAntiPatterns = !!(designIntent?.antiPatterns?.forbidden && designIntent.antiPatterns.forbidden.length > 0);
+  checks.push({
+    id: 'check-anti-patterns',
+    category: 'design',
+    label: 'Forbidden Anti-Patterns defined',
+    passed: hasAntiPatterns,
+    detail: hasAntiPatterns ? `${designIntent?.antiPatterns?.forbidden?.length} anti-patterns specified.` : 'Select what visual clichés coding agents MUST NOT produce.',
+    weight: 10
+  });
+
+  const hasCriteria = !!(designIntent?.visualAcceptanceCriteria?.criteria && designIntent.visualAcceptanceCriteria.criteria.length > 0);
+  checks.push({
+    id: 'check-visual-criteria',
+    category: 'design',
+    label: 'Visual Acceptance Criteria established',
+    passed: hasCriteria,
+    detail: hasCriteria ? `${designIntent?.visualAcceptanceCriteria?.criteria?.length} testable criteria defined.` : 'Define what visually successful completion means.',
+    weight: 10
+  });
+
+  // ==========================================
+  // 4. TECHNICAL READINESS CHECKS
+  // ==========================================
   const archNodes = nodeTypeMap.get('architecture') || [];
   const hasArch = archNodes.some((n) => n.data.content.trim().length > 30);
   checks.push({
     id: 'check-arch',
-    label: 'Architecture defined',
+    category: 'technical',
+    label: 'System Architecture & Boundaries',
     passed: hasArch,
     detail: hasArch ? 'System topology and boundaries defined.' : 'Architecture node is missing or undefined.',
     weight: 15
   });
-  if (!hasArch) {
-    findings.push({
-      id: 'finding-arch',
-      severity: 'WARNING',
-      title: 'Architecture Missing',
-      message: 'System architecture guides directory layout, database interactions, and API communication.',
-      fixActionLabel: 'Add Architecture'
-    });
-  }
 
-  // Check 5: Tech Stack (10)
   const techNodes = nodeTypeMap.get('tech_stack') || [];
   const hasTech = techNodes.some((n) => n.data.content.trim().length > 20);
   checks.push({
     id: 'check-tech',
-    label: 'Tech Stack justified',
+    category: 'technical',
+    label: 'Technology Stack justified',
     passed: hasTech,
     detail: hasTech ? 'Technologies and rationales documented.' : 'Add a Tech Stack node with reasons for key choices.',
     weight: 10
   });
 
-  // Check 6: Data Model (10)
   const dataModelNodes = nodeTypeMap.get('data_model') || [];
   const hasDataModel = dataModelNodes.some((n) => n.data.content.trim().length > 20);
   checks.push({
     id: 'check-datamodel',
-    label: 'Data Model specified',
+    category: 'technical',
+    label: 'Data Model & Schemas mapped',
     passed: hasDataModel,
     detail: hasDataModel ? 'Entities and relationships are mapped.' : 'Consider defining your data model and schemas.',
     weight: 10
   });
 
-  // Check 7: API (10)
   const apiNodes = nodeTypeMap.get('api') || [];
   const hasApi = apiNodes.some((n) => n.data.content.trim().length > 20);
   checks.push({
     id: 'check-api',
-    label: 'API contracts designed',
+    category: 'technical',
+    label: 'API Specifications designed',
     passed: hasApi,
-    detail: hasApi ? 'Endpoints and request/response payloads defined.' : 'Define API endpoints to establish frontend-backend boundaries.',
+    detail: hasApi ? 'Endpoints and request/response payloads defined.' : 'Define API endpoints to establish boundaries.',
     weight: 10
   });
 
-  // Check 8: Tasks (10)
   const taskNodes = nodeTypeMap.get('tasks') || [];
   const hasTasks = taskNodes.some((n) => n.data.content.trim().length > 30);
   checks.push({
     id: 'check-tasks',
-    label: 'Execution Tasks broken down',
+    category: 'technical',
+    label: 'Implementation Task Breakdown',
     passed: hasTasks,
-    detail: hasTasks ? 'Actionable tasks and phases ready.' : 'Break implementation down into sequential task items.',
-    weight: 10
+    detail: hasTasks ? 'Actionable tasks and execution plan ready.' : 'Break implementation down into sequential task items.',
+    weight: 15
   });
   if (!hasTasks) {
     findings.push({
@@ -147,18 +194,21 @@ export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[])
     });
   }
 
-  // Check 9: Test Plan (5)
+  // ==========================================
+  // 5. VERIFICATION CHECKS
+  // ==========================================
   const testNodes = nodeTypeMap.get('test_plan') || [];
   const hasTestPlan = testNodes.some((n) => n.data.content.trim().length > 20);
   checks.push({
     id: 'check-test',
-    label: 'Test Plan established',
+    category: 'verification',
+    label: 'Verification Strategy & Test Plan',
     passed: hasTestPlan,
-    detail: hasTestPlan ? 'Verification and testing strategy documented.' : 'Add a Test Plan node to specify QA criteria.',
-    weight: 5
+    detail: hasTestPlan ? 'QA and testing criteria documented.' : 'Add a Test Plan node to specify verification protocol.',
+    weight: 10
   });
 
-  // Check 10: Circular Dependencies Detection
+  // Check Circular Dependencies
   const circularCycle = findCycle(nodes, edges);
   if (circularCycle.length > 0) {
     findings.push({
@@ -170,7 +220,7 @@ export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[])
     });
   }
 
-  // Check 11: Outdated Nodes
+  // Check Outdated Nodes
   const outdatedNodes = nodes.filter((n) => n.data.status === 'outdated');
   for (const outNode of outdatedNodes) {
     findings.push({
@@ -184,7 +234,30 @@ export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[])
     });
   }
 
-  // Calculate Health Score
+  // Calculate Overall and Category Breakdown Scores
+  const categoryDefs: { cat: ReadinessCategory; title: string }[] = [
+    { cat: 'product', title: 'Product Definition' },
+    { cat: 'ux', title: 'UX & State Feelings' },
+    { cat: 'design', title: 'Design Intent & North Star' },
+    { cat: 'technical', title: 'Technical Architecture' },
+    { cat: 'verification', title: 'Verification Strategy' }
+  ];
+
+  const categories: ReadinessCategoryBreakdown[] = categoryDefs.map(({ cat, title }) => {
+    const catChecks = checks.filter((c) => c.category === cat);
+    const catTotal = catChecks.reduce((acc, c) => acc + c.weight, 0);
+    const catEarned = catChecks.filter((c) => c.passed).reduce((acc, c) => acc + c.weight, 0);
+    const score = catTotal > 0 ? Math.round((catEarned / catTotal) * 100) : 0;
+    return {
+      category: cat,
+      title,
+      score,
+      passedChecks: catChecks.filter((c) => c.passed).length,
+      totalChecks: catChecks.length,
+      checks: catChecks
+    };
+  });
+
   let totalWeight = 0;
   let earnedWeight = 0;
   for (const c of checks) {
@@ -203,6 +276,7 @@ export function validateProjectGraph(nodes: PlannerNode[], edges: PlannerEdge[])
     score: rawScore,
     passedChecks: passedCount,
     totalChecks: checks.length,
+    categories,
     findings,
     checks,
     timestamp: new Date().toISOString()

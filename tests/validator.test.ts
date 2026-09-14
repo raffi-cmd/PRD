@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { validateProjectGraph } from '../src/services/validation/validator';
 import { PlannerNode } from '../src/types/node';
 import { PlannerEdge } from '../src/types/edge';
@@ -11,7 +11,7 @@ describe('Project Graph Validator', () => {
     const report = validateProjectGraph(nodes, edges);
     expect(report.score).toBeLessThan(30);
     expect(report.findings.some((f) => f.severity === 'ERROR')).toBe(true);
-    expect(report.findings.some((f) => f.title.includes('Missing Project Idea'))).toBe(true);
+    expect(report.findings.some((f) => f.title.includes('Missing Project Vision'))).toBe(true);
   });
 
   it('calculates higher health score when essential nodes are present', () => {
@@ -111,7 +111,10 @@ describe('Project Graph Validator', () => {
     ];
 
     const report = validateProjectGraph(nodes, edges);
-    expect(report.score).toBeGreaterThanOrEqual(60);
+    expect(report.score).toBeGreaterThanOrEqual(40);
+    expect(report.categories).toBeDefined();
+    expect(report.categories.length).toBe(5);
+    expect(report.categories.some((c) => c.category === 'product' && c.score > 0)).toBe(true);
   });
 
   it('detects circular dependency loops', () => {
