@@ -29,7 +29,7 @@ export const AI_PROVIDER_PRESETS: Record<
   anthropic: {
     name: 'Anthropic (Claude)',
     description: 'Claude 3.7 Sonnet, Claude 3.5 Sonnet, and Claude 3.5 Haiku',
-    defaultModel: 'claude-3-5-sonnet-latest',
+    defaultModel: 'claude-3-7-sonnet-20250219',
     apiKeyUrl: 'https://console.anthropic.com/settings/keys',
     keyPlaceholder: 'sk-ant-api03-...'
   },
@@ -59,7 +59,7 @@ export const POPULAR_AI_MODELS: AIModelPreset[] = [
     name: 'Gemini 2.0 Flash',
     provider: 'gemini',
     category: 'fast',
-    description: 'Ultra fast, responsive, multimodal, and reliable for standard planning',
+    description: 'Ultra fast, multimodal, and reliable default for architecture graphs',
     isRecommended: true
   },
   {
@@ -67,7 +67,8 @@ export const POPULAR_AI_MODELS: AIModelPreset[] = [
     name: 'Gemini 2.5 Flash',
     provider: 'gemini',
     category: 'fast',
-    description: 'Next-generation adaptive flash model with high instruction adherence'
+    description: 'Next-generation adaptive flash model with high instruction adherence',
+    isRecommended: true
   },
   {
     id: 'gemini-2.5-pro',
@@ -81,7 +82,7 @@ export const POPULAR_AI_MODELS: AIModelPreset[] = [
     name: 'Gemini 1.5 Flash',
     provider: 'gemini',
     category: 'fast',
-    description: 'Stable, proven fast model with high concurrency tolerance'
+    description: 'Proven high-stability fast model with high concurrency tolerance'
   },
   {
     id: 'gemini-1.5-pro',
@@ -96,6 +97,46 @@ export const POPULAR_AI_MODELS: AIModelPreset[] = [
     provider: 'gemini',
     category: 'flagship',
     description: 'Experimental flagship with state-of-the-art coding abilities'
+  },
+
+  // --- Anthropic Claude ---
+  {
+    id: 'claude-3-7-sonnet-20250219',
+    name: 'Claude 3.7 Sonnet (Hybrid Reasoning)',
+    provider: 'anthropic',
+    category: 'flagship',
+    description: 'State-of-the-art Claude 3.7 model with instantaneous architecture reasoning',
+    isRecommended: true
+  },
+  {
+    id: 'claude-3-7-sonnet-latest',
+    name: 'Claude 3.7 Sonnet (Latest)',
+    provider: 'anthropic',
+    category: 'flagship',
+    description: 'Alias to latest Claude 3.7 Sonnet build',
+    isRecommended: true
+  },
+  {
+    id: 'claude-3-5-sonnet-latest',
+    name: 'Claude 3.5 Sonnet',
+    provider: 'anthropic',
+    category: 'flagship',
+    description: 'Industry-leading benchmark in coding, planning, and technical clarity',
+    isRecommended: true
+  },
+  {
+    id: 'claude-3-5-haiku-latest',
+    name: 'Claude 3.5 Haiku',
+    provider: 'anthropic',
+    category: 'fast',
+    description: 'Lightning fast and punchy for quick prompt actions'
+  },
+  {
+    id: 'claude-3-opus-latest',
+    name: 'Claude 3 Opus',
+    provider: 'anthropic',
+    category: 'reasoning',
+    description: 'Deep writing and foundational architectural reasoning'
   },
 
   // --- OpenAI / ChatGPT ---
@@ -137,43 +178,18 @@ export const POPULAR_AI_MODELS: AIModelPreset[] = [
     description: 'Faster reasoning model specialized for coding synthesis'
   },
   {
+    id: 'gpt-4.5-preview',
+    name: 'GPT-4.5 Preview',
+    provider: 'openai',
+    category: 'flagship',
+    description: 'Next generation flagship preview model'
+  },
+  {
     id: 'gpt-4-turbo',
     name: 'GPT-4 Turbo',
     provider: 'openai',
     category: 'flagship',
     description: 'Previous generation GPT-4 model with 128k context'
-  },
-
-  // --- Anthropic Claude ---
-  {
-    id: 'claude-3-7-sonnet-20250219',
-    name: 'Claude 3.7 Sonnet',
-    provider: 'anthropic',
-    category: 'flagship',
-    description: 'Hybrid reasoning model with unprecedented code architecture nuance',
-    isRecommended: true
-  },
-  {
-    id: 'claude-3-5-sonnet-latest',
-    name: 'Claude 3.5 Sonnet',
-    provider: 'anthropic',
-    category: 'flagship',
-    description: 'Industry-leading benchmark in coding, planning, and technical clarity',
-    isRecommended: true
-  },
-  {
-    id: 'claude-3-5-haiku-latest',
-    name: 'Claude 3.5 Haiku',
-    provider: 'anthropic',
-    category: 'fast',
-    description: 'Lightning fast and punchy for quick prompt actions'
-  },
-  {
-    id: 'claude-3-opus-latest',
-    name: 'Claude 3 Opus',
-    provider: 'anthropic',
-    category: 'reasoning',
-    description: 'Deep writing and foundational architectural reasoning'
   },
 
   // --- OpenRouter & DeepSeek / Open Models ---
@@ -198,6 +214,13 @@ export const POPULAR_AI_MODELS: AIModelPreset[] = [
     provider: 'openrouter',
     category: 'flagship',
     description: 'Meta flagship open model for general engineering tasks'
+  },
+  {
+    id: 'anthropic/claude-3.7-sonnet',
+    name: 'Claude 3.7 Sonnet (via OpenRouter)',
+    provider: 'openrouter',
+    category: 'flagship',
+    description: 'Access Anthropic Claude 3.7 via OpenRouter'
   },
   {
     id: 'anthropic/claude-3.5-sonnet',

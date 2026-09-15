@@ -1,5 +1,5 @@
 ﻿import React, { useState, useRef, useEffect } from 'react';
-import { Sparkles, ChevronDown, Check, Zap, Brain, Layers, Search, X } from 'lucide-react';
+import { Sparkles, ChevronDown, Check, Zap, Brain, Layers, Search, X, PlusCircle } from 'lucide-react';
 import { AIModelPreset, AIProviderType } from '../../types/ai';
 import { POPULAR_AI_MODELS } from '../../constants/aiModels';
 
@@ -19,13 +19,13 @@ export const ModelAutocomplete: React.FC<ModelAutocompleteProps> = ({
   disabled = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(value);
+  const [searchQuery, setSearchQuery] = useState(value || '');
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Synchronize internal query state with external value changes
   useEffect(() => {
-    setSearchQuery(value);
+    setSearchQuery(value || '');
   }, [value]);
 
   // Close dropdown on outside click
@@ -51,6 +51,10 @@ export const ModelAutocomplete: React.FC<ModelAutocompleteProps> = ({
     );
   });
 
+  const exactMatch = providerModels.some(
+    (m) => m.id.toLowerCase() === searchQuery.trim().toLowerCase()
+  );
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nextVal = e.target.value;
     setSearchQuery(nextVal);
@@ -58,11 +62,38 @@ export const ModelAutocomplete: React.FC<ModelAutocompleteProps> = ({
     setIsOpen(true);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (filteredModels.length > 0 && !exactMatch && searchQuery.trim().length > 0) {
+        // If user pressed enter on filtered list, select first match or current query
+        const best = filteredModels[0];
+        setSearchQuery(best.id);
+        onChange(best.id);
+      } else {
+        onChange(searchQuery.trim());
+      }
+      setIsOpen(false);
+      inputRef.current?.blur();
+    } else if (e.key === 'Escape') {
+      setIsOpen(false);
+    }
+  };
+
   const handleSelectModel = (model: AIModelPreset) => {
     setSearchQuery(model.id);
     onChange(model.id);
     setIsOpen(false);
     inputRef.current?.blur();
+  };
+
+  const handleSelectCustomQuery = () => {
+    const trimmed = searchQuery.trim();
+    if (trimmed) {
+      onChange(trimmed);
+      setIsOpen(false);
+      inputRef.current?.blur();
+    }
   };
 
   const getCategoryBadge = (cat?: string) => {
@@ -98,10 +129,11 @@ export const ModelAutocomplete: React.FC<ModelAutocompleteProps> = ({
           type="text"
           value={searchQuery}
           onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
           onFocus={() => setIsOpen(true)}
           disabled={disabled}
           placeholder={placeholder}
-          className="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg pl-3 pr-16 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none font-mono transition"
+          className="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg pl-3 pr-16 py-2 text-xs text-slate-100 placeholder-slate-600 focus:outline-none font-mono transition shadow-inner"
         />
         <div className="absolute right-2 flex items-center gap-1">
           {searchQuery && (
@@ -134,13 +166,28 @@ export const ModelAutocomplete: React.FC<ModelAutocompleteProps> = ({
       {isOpen && (
         <div className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-slate-900 border border-slate-800 rounded-xl shadow-2xl max-h-64 overflow-y-auto divide-y divide-slate-800/50 backdrop-blur-md">
           {/* Quick info bar */}
-          <div className="px-3 py-1.5 bg-slate-950/60 text-[10px] text-slate-400 flex items-center justify-between border-b border-slate-800/80">
+          <div className="px-3 py-1.5 bg-slate-950/80 text-[10px] text-slate-400 flex items-center justify-between border-b border-slate-800/80">
             <span className="flex items-center gap-1">
               <Search className="w-3 h-3 text-brand-400" />
-              {filteredModels.length} suggestions (or type custom model)
+              {filteredModels.length} suggestions
             </span>
-            <span className="font-mono text-slate-500">Freeform editable</span>
+            <span className="font-mono text-slate-500">Press Enter or click</span>
           </div>
+
+          {/* If user typed custom query not exact match, show option to use it */}
+          {searchQuery.trim() && !exactMatch && (
+            <button
+              type="button"
+              onClick={handleSelectCustomQuery}
+              className="w-full text-left px-3 py-2 text-xs bg-brand-500/5 hover:bg-brand-500/15 border-b border-slate-800/60 flex items-center justify-between transition cursor-pointer text-brand-300"
+            >
+              <div className="flex items-center gap-1.5 min-w-0">
+                <PlusCircle className="w-3.5 h-3.5 text-brand-400 shrink-0" />
+                <span className="truncate">Use model: <code className="font-mono font-bold text-slate-100">{searchQuery.trim()}</code></span>
+              </div>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-brand-500/20 text-brand-300 font-mono shrink-0">CUSTOM</span>
+            </button>
+          )}
 
           {filteredModels.length > 0 ? (
             <div className="py-1">

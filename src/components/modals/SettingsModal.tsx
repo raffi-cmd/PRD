@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AIProviderConfig, AIProviderType } from '../../types/ai';
 import {
   X,
@@ -45,13 +45,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; message: string; latency?: number } | null>(null);
 
-  // When switching provider, load the stored key for that provider and default model if not set
   const handleSwitchProvider = (newProvider: AIProviderType) => {
     setActiveProvider(newProvider);
     const stored = getStoredApiKey(newProvider);
     setApiKey(stored);
+    const storedModel = localStorage.getItem(`vibe_${newProvider}_model`);
     const preset = AI_PROVIDER_PRESETS[newProvider];
-    setModel(preset.defaultModel);
+    setModel(storedModel || preset.defaultModel);
     if (preset.defaultBaseUrl) {
       setBaseUrl(preset.defaultBaseUrl);
     } else {

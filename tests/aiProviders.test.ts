@@ -23,7 +23,7 @@ describe('AI Providers & Model Presets', () => {
   it('should have provider presets defined with default models and key URLs', () => {
     expect(AI_PROVIDER_PRESETS.gemini.defaultModel).toBe('gemini-2.0-flash');
     expect(AI_PROVIDER_PRESETS.openai.defaultModel).toBe('gpt-4o-mini');
-    expect(AI_PROVIDER_PRESETS.anthropic.defaultModel).toBe('claude-3-5-sonnet-latest');
+    expect(AI_PROVIDER_PRESETS.anthropic.defaultModel).toBe('claude-3-7-sonnet-20250219');
     expect(AI_PROVIDER_PRESETS.openrouter.defaultModel).toBe('deepseek/deepseek-chat');
   });
 

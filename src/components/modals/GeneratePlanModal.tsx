@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import {
   Sparkles,
   X,
@@ -8,16 +8,18 @@ import {
   RefreshCw,
   Zap,
   Wand2,
-  Layers
+  Layers,
+  ChevronDown
 } from 'lucide-react';
-import { AIProviderConfig } from '../../types/ai';
+import { AIProviderConfig, AIProviderType } from '../../types/ai';
 import { getAIProvider } from '../../services/ai/provider';
 import { buildProjectPlanSynthesisPrompt, SYSTEM_ARCHITECT_PROMPT } from '../../services/ai/prompts';
-import { PlannerNode, NodeType } from '../../types/node';
+import { PlannerNode } from '../../types/node';
 import { PlannerEdge } from '../../types/edge';
 import { NODE_CONFIGS } from '../../constants/nodeConfigs';
 import { ModelAutocomplete } from '../common/ModelAutocomplete';
 import { AI_PROVIDER_PRESETS } from '../../constants/aiModels';
+import { getStoredApiKey } from '../../services/storage/projectIO';
 
 interface GeneratePlanModalProps {
   isOpen: boolean;
@@ -35,14 +37,32 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
   onApplySynthesizedGraph
 }) => {
   const [ideaInput, setIdeaInput] = useState('');
+  const [activeProvider, setActiveProvider] = useState<AIProviderType>(aiConfig.provider || 'gemini');
   const [selectedModel, setSelectedModel] = useState(aiConfig.model || 'gemini-2.0-flash');
   const [showModelOverride, setShowModelOverride] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  // Synchronize state whenever modal opens or aiConfig changes
+  useEffect(() => {
+    if (isOpen) {
+      const currentProv = aiConfig.provider || 'gemini';
+      setActiveProvider(currentProv);
+      setSelectedModel(aiConfig.model || AI_PROVIDER_PRESETS[currentProv].defaultModel);
+      setErrorMsg('');
+    }
+  }, [isOpen, aiConfig.provider, aiConfig.model]);
+
   if (!isOpen) return null;
 
-  const activeProviderPreset = AI_PROVIDER_PRESETS[aiConfig.provider || 'gemini'];
+  const activeProviderPreset = AI_PROVIDER_PRESETS[activeProvider];
+
+  const handleSwitchProvider = (p: AIProviderType) => {
+    setActiveProvider(p);
+    const storedModel = localStorage.getItem(`vibe_${p}_model`);
+    setSelectedModel(storedModel || AI_PROVIDER_PRESETS[p].defaultModel);
+    setErrorMsg('');
+  };
 
   const exampleIdeas = [
     'A developer portfolio generator that parses GitHub repositories and exports an interactive static site.',
@@ -73,87 +93,87 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
       'node-aicontext': { x: 450, y: 2160 }
     };
 
-    const nodeTemplates: Array<{ id: string; type: NodeType; title: string; content: string }> = [
+    const nodeTemplates = [
       {
         id: 'node-idea',
-        type: 'idea',
+        type: 'idea' as const,
         title: 'Project Vision & Concept',
         content: `## Vision\n${concept}\n\n## Value Proposition\nProvide immediate, accurate utility with high precision and clean visual feedback.`
       },
       {
         id: 'node-requirements',
-        type: 'requirements',
+        type: 'requirements' as const,
         title: 'Core System Requirements',
         content: `## Functional Requirements\n- FR-1: Interactive input parameters with instant reactive calculation.\n- FR-2: Detailed breakdown formula display and unit conversion.\n- FR-3: Local storage persistence for past calculations.\n- FR-4: Export summary to PDF/Markdown.`
       },
       {
         id: 'node-prd',
-        type: 'prd',
+        type: 'prd' as const,
         title: 'Product Requirements Document (PRD)',
         content: `## 1. Problem Statement\nUsers need an effortless, reliable calculation tool that minimizes guesswork and waste.\n\n## 2. User Personas\nEngineers, contractors, homeowners, and developers.\n\n## 3. Success Metrics\nCalculation latency < 50ms, zero calculation errors, high mobile responsiveness.`
       },
       {
         id: 'node-uiux',
-        type: 'ui_ux',
+        type: 'ui_ux' as const,
         title: 'UX & Visual Flow',
         content: `## Screen Architecture\n1. Dual-column desktop layout (Input parameters on left, Live calculated receipt on right).\n2. Step-by-step mobile sheet navigation.\n3. High contrast feedback badges for material estimates.`
       },
       {
         id: 'node-arch',
-        type: 'architecture',
+        type: 'architecture' as const,
         title: 'System Architecture',
         content: `## Architecture Diagram\nReact UI Layer -> Calculation Engine -> LocalStorage Cache -> Export Module`
       },
       {
         id: 'node-techstack',
-        type: 'tech_stack',
+        type: 'tech_stack' as const,
         title: 'Technology Stack',
         content: `## Frontend\n- React + TypeScript\n- Tailwind CSS\n- Lucide Icons\n- Vite Bundler`
       },
       {
         id: 'node-datamodel',
-        type: 'data_model',
+        type: 'data_model' as const,
         title: 'Data Models & Schemas',
         content: `## CalculationSchema\n\`\`\`typescript\ninterface CalculationInput {\n  length: number;\n  height: number;\n  coats: number;\n  coveragePerLiter: number;\n}\ninterface EstimateResult {\n  paintLiters: number;\n  cementBags: number;\n  sandVolumeM3: number;\n  estimatedCost: number;\n}\n\`\`\``
       },
       {
         id: 'node-api',
-        type: 'api',
+        type: 'api' as const,
         title: 'API Contracts & Interfaces',
         content: `## Internal Calculation API\n- calculatePaintRequirement(input)\n- calculateMasonryMaterials(area, thickness)\n- exportCalculationReport(data)`
       },
       {
         id: 'node-tasks',
-        type: 'tasks',
+        type: 'tasks' as const,
         title: 'Implementation Task Breakdown',
         content: `## Phase 1: Core Calculation Engine\n- [ ] Task 1: Setup React + Vite + Tailwind scaffolding\n- [ ] Task 2: Implement reactive formula calculation service\n- [ ] Task 3: Build interactive input controls with validation\n- [ ] Task 4: Build live results dashboard\n- [ ] Task 5: Add LocalStorage export history`
       },
       {
         id: 'node-testplan',
-        type: 'test_plan',
+        type: 'test_plan' as const,
         title: 'Verification & QA Plan',
         content: `## Unit Tests\n- Formula edge cases (zero values, negative inputs, large numbers)\n- Unit conversion accuracy`
       },
       {
         id: 'node-validation',
-        type: 'validation',
+        type: 'validation' as const,
         title: 'Quality & Design Gate',
         content: `## Quality Checklist\n- [x] High contrast readability\n- [x] Zero layout shifts during calculation\n- [x] Mobile friendly touch targets`
       },
       {
         id: 'node-aicontext',
-        type: 'ai_context',
+        type: 'ai_context' as const,
         title: 'AI Coding Context Handoff',
         content: `## AI Instructions\nBuild this application with clean separation between the mathematical formula logic and UI presentation.`
       }
     ];
 
-    const nodes: PlannerNode[] = nodeTemplates.map((nt, idx) => {
+    const nodes: PlannerNode[] = nodeTemplates.map((nt) => {
       const config = NODE_CONFIGS[nt.type] || NODE_CONFIGS.custom;
       return {
         id: nt.id,
         type: 'plannerNode',
-        position: coordinateMap[nt.id] || { x: 100, y: idx * 250 },
+        position: coordinateMap[nt.id] || { x: 100, y: 100 },
         data: {
           id: nt.id,
           type: nt.type,
@@ -203,10 +223,14 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
       return;
     }
 
-    const currentKey = aiConfig.apiKey?.trim();
+    const currentKey =
+      activeProvider === aiConfig.provider && aiConfig.apiKey?.trim()
+        ? aiConfig.apiKey.trim()
+        : getStoredApiKey(activeProvider);
+
     const isLocal = aiConfig.baseUrl?.includes('localhost') || aiConfig.baseUrl?.includes('127.0.0.1');
 
-    if (!currentKey && !isLocal && aiConfig.provider !== 'custom') {
+    if (!currentKey && !isLocal && activeProvider !== 'custom') {
       setErrorMsg(`Please configure your ${activeProviderPreset.name} API Key in Settings first.`);
       return;
     }
@@ -214,11 +238,13 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
     setErrorMsg('');
     setIsGenerating(true);
 
-    const modelToUse = overrideModel || selectedModel || aiConfig.model || activeProviderPreset.defaultModel;
+    const modelToUse = (overrideModel || selectedModel || activeProviderPreset.defaultModel).trim();
 
     try {
       const activeConfig: AIProviderConfig = {
         ...aiConfig,
+        provider: activeProvider,
+        apiKey: currentKey,
         model: modelToUse
       };
 
@@ -271,8 +297,8 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
 
       if (Array.isArray(parsed.nodes)) {
         parsed.nodes.forEach((n: any, idx: number) => {
-          const type: NodeType = n.type || 'custom';
-          const config = NODE_CONFIGS[type] || NODE_CONFIGS.custom;
+          const type = n.type || 'custom';
+          const config = (NODE_CONFIGS as any)[type] || NODE_CONFIGS.custom;
           const pos = coordinateMap[n.id] || {
             x: 100 + (idx % 3) * 380,
             y: 100 + Math.floor(idx / 3) * 320
@@ -337,6 +363,8 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
     }
   };
 
+  const providersList: AIProviderType[] = ['gemini', 'openai', 'anthropic', 'openrouter', 'custom'];
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
       <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
@@ -365,52 +393,82 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
         {/* Modal Body */}
         <div className="p-5 space-y-4 overflow-y-auto">
           {/* Active AI Provider & Model Bar */}
-          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 text-xs">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-              <div className="truncate">
-                <span className="text-slate-400 font-medium">Provider: </span>
-                <span className="text-slate-200 font-semibold">{activeProviderPreset.name}</span>
-                <span className="text-slate-500 mx-1.5">&bull;</span>
-                <span className="font-mono text-brand-300">{selectedModel}</span>
+          <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5 text-xs shadow-inner">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                <div className="truncate">
+                  <span className="text-slate-400 font-medium">Provider: </span>
+                  <span className="text-slate-100 font-bold">{activeProviderPreset.name}</span>
+                  <span className="text-slate-600 mx-1.5">&bull;</span>
+                  <span className="font-mono text-brand-300 font-semibold">{selectedModel}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setShowModelOverride(!showModelOverride)}
+                  className="flex items-center gap-1 px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-[11px] text-slate-200 border border-slate-700/80 transition cursor-pointer font-medium"
+                >
+                  <span>{showModelOverride ? 'Close Model Menu' : 'Change Model'}</span>
+                  <ChevronDown className={`w-3 h-3 transition-transform ${showModelOverride ? 'rotate-180' : ''}`} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSettings();
+                  }}
+                  className="p-1.5 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-700/80 transition cursor-pointer"
+                  title="Open AI Settings"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                onClick={() => setShowModelOverride(!showModelOverride)}
-                className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] text-slate-300 border border-slate-800 transition cursor-pointer"
-              >
-                {showModelOverride ? 'Hide Model Selector' : 'Change Model'}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onClose();
-                  onOpenSettings();
-                }}
-                className="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition cursor-pointer"
-                title="Open Settings"
-              >
-                <Settings className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
 
-          {/* Quick Model Selector when opened */}
-          {showModelOverride && (
-            <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
-              <label className="block text-[11px] font-medium text-slate-300">
-                Switch AI Model (Type or select)
-              </label>
-              <ModelAutocomplete
-                value={selectedModel}
-                onChange={setSelectedModel}
-                provider={aiConfig.provider || 'gemini'}
-                placeholder="e.g. gemini-2.0-flash, gpt-4o, claude-3-5-sonnet-latest"
-              />
-            </div>
-          )}
+            {/* Quick Model Selector when opened */}
+            {showModelOverride && (
+              <div className="pt-2 border-t border-slate-800/80 space-y-2">
+                {/* Switch provider buttons */}
+                <div>
+                  <label className="block text-[10px] text-slate-400 mb-1">Switch Provider:</label>
+                  <div className="flex flex-wrap gap-1">
+                    {providersList.map((p) => (
+                      <button
+                        key={p}
+                        type="button"
+                        onClick={() => handleSwitchProvider(p)}
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium transition cursor-pointer ${
+                          activeProvider === p
+                            ? 'bg-brand-500 text-slate-950 font-bold'
+                            : 'bg-slate-900 text-slate-400 hover:text-slate-200 border border-slate-800'
+                        }`}
+                      >
+                        {p === 'openai' ? 'ChatGPT' : p === 'anthropic' ? 'Claude' : p}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Model input autocomplete */}
+                <div>
+                  <label className="block text-[10px] text-slate-400 mb-1">
+                    Model Name (Type freely or choose):
+                  </label>
+                  <ModelAutocomplete
+                    value={selectedModel}
+                    onChange={(m) => {
+                      setSelectedModel(m);
+                      localStorage.setItem(`vibe_${activeProvider}_model`, m);
+                    }}
+                    provider={activeProvider}
+                    placeholder={`e.g. ${activeProviderPreset.defaultModel}`}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">
@@ -421,7 +479,7 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
               value={ideaInput}
               onChange={(e) => setIdeaInput(e.target.value)}
               placeholder="Describe your project idea in detail: target users, key functionality, architecture desires, or problem to solve..."
-              className="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none resize-none leading-relaxed"
+              className="w-full bg-slate-950 border border-slate-800 focus:border-brand-500 rounded-lg p-3 text-xs text-slate-200 placeholder-slate-600 focus:outline-none resize-none leading-relaxed shadow-inner"
             />
           </div>
 
@@ -463,7 +521,7 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
                   <span>Retry</span>
                 </button>
 
-                {aiConfig.provider === 'gemini' && (
+                {activeProvider === 'gemini' && (
                   <button
                     type="button"
                     onClick={() => {
@@ -487,7 +545,7 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
                   className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300 transition cursor-pointer"
                 >
                   <Settings className="w-3 h-3" />
-                  <span>Change Provider / Key in Settings</span>
+                  <span>Change Key in Settings</span>
                 </button>
 
                 <button
