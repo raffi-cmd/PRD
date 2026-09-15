@@ -1,16 +1,29 @@
-﻿import React, { useState } from 'react';
-import { Sparkles, X, AlertCircle, Loader2 } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Sparkles,
+  X,
+  AlertCircle,
+  Loader2,
+  Settings,
+  RefreshCw,
+  Zap,
+  Wand2,
+  Layers
+} from 'lucide-react';
 import { AIProviderConfig } from '../../types/ai';
 import { getAIProvider } from '../../services/ai/provider';
 import { buildProjectPlanSynthesisPrompt, SYSTEM_ARCHITECT_PROMPT } from '../../services/ai/prompts';
 import { PlannerNode, NodeType } from '../../types/node';
 import { PlannerEdge } from '../../types/edge';
 import { NODE_CONFIGS } from '../../constants/nodeConfigs';
+import { ModelAutocomplete } from '../common/ModelAutocomplete';
+import { AI_PROVIDER_PRESETS } from '../../constants/aiModels';
 
 interface GeneratePlanModalProps {
   isOpen: boolean;
   onClose: () => void;
   aiConfig: AIProviderConfig;
+  onOpenSettings: () => void;
   onApplySynthesizedGraph: (title: string, description: string, nodes: PlannerNode[], edges: PlannerEdge[]) => void;
 }
 
@@ -18,13 +31,18 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
   isOpen,
   onClose,
   aiConfig,
+  onOpenSettings,
   onApplySynthesizedGraph
 }) => {
   const [ideaInput, setIdeaInput] = useState('');
+  const [selectedModel, setSelectedModel] = useState(aiConfig.model || 'gemini-2.0-flash');
+  const [showModelOverride, setShowModelOverride] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
   if (!isOpen) return null;
+
+  const activeProviderPreset = AI_PROVIDER_PRESETS[aiConfig.provider || 'gemini'];
 
   const exampleIdeas = [
     'A developer portfolio generator that parses GitHub repositories and exports an interactive static site.',
@@ -32,32 +50,189 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
     'A real-time collaborative code review tool with syntax diffing, inline discussion, and automated linter integration.'
   ];
 
-  const handleGenerate = async () => {
+  // Helper to generate an offline/fallback synthesized graph if API is overloaded or key is missing
+  const generateOfflineFallback = (concept: string) => {
+    const now = new Date().toISOString();
+    const titleMatch = concept.match(/(?:aplikasi|app|kalkulator|generator|tool|platform|system)\s+([^.]+)/i);
+    const projectTitle = titleMatch
+      ? titleMatch[0].charAt(0).toUpperCase() + titleMatch[0].slice(1)
+      : 'Architected System Plan';
+
+    const coordinateMap: Record<string, { x: number; y: number }> = {
+      'node-idea': { x: 450, y: 40 },
+      'node-requirements': { x: 450, y: 280 },
+      'node-prd': { x: 450, y: 520 },
+      'node-uiux': { x: 60, y: 760 },
+      'node-arch': { x: 450, y: 760 },
+      'node-techstack': { x: 840, y: 760 },
+      'node-datamodel': { x: 260, y: 1040 },
+      'node-api': { x: 640, y: 1040 },
+      'node-tasks': { x: 450, y: 1320 },
+      'node-testplan': { x: 450, y: 1600 },
+      'node-validation': { x: 450, y: 1880 },
+      'node-aicontext': { x: 450, y: 2160 }
+    };
+
+    const nodeTemplates: Array<{ id: string; type: NodeType; title: string; content: string }> = [
+      {
+        id: 'node-idea',
+        type: 'idea',
+        title: 'Project Vision & Concept',
+        content: `## Vision\n${concept}\n\n## Value Proposition\nProvide immediate, accurate utility with high precision and clean visual feedback.`
+      },
+      {
+        id: 'node-requirements',
+        type: 'requirements',
+        title: 'Core System Requirements',
+        content: `## Functional Requirements\n- FR-1: Interactive input parameters with instant reactive calculation.\n- FR-2: Detailed breakdown formula display and unit conversion.\n- FR-3: Local storage persistence for past calculations.\n- FR-4: Export summary to PDF/Markdown.`
+      },
+      {
+        id: 'node-prd',
+        type: 'prd',
+        title: 'Product Requirements Document (PRD)',
+        content: `## 1. Problem Statement\nUsers need an effortless, reliable calculation tool that minimizes guesswork and waste.\n\n## 2. User Personas\nEngineers, contractors, homeowners, and developers.\n\n## 3. Success Metrics\nCalculation latency < 50ms, zero calculation errors, high mobile responsiveness.`
+      },
+      {
+        id: 'node-uiux',
+        type: 'ui_ux',
+        title: 'UX & Visual Flow',
+        content: `## Screen Architecture\n1. Dual-column desktop layout (Input parameters on left, Live calculated receipt on right).\n2. Step-by-step mobile sheet navigation.\n3. High contrast feedback badges for material estimates.`
+      },
+      {
+        id: 'node-arch',
+        type: 'architecture',
+        title: 'System Architecture',
+        content: `## Architecture Diagram\nReact UI Layer -> Calculation Engine -> LocalStorage Cache -> Export Module`
+      },
+      {
+        id: 'node-techstack',
+        type: 'tech_stack',
+        title: 'Technology Stack',
+        content: `## Frontend\n- React + TypeScript\n- Tailwind CSS\n- Lucide Icons\n- Vite Bundler`
+      },
+      {
+        id: 'node-datamodel',
+        type: 'data_model',
+        title: 'Data Models & Schemas',
+        content: `## CalculationSchema\n\`\`\`typescript\ninterface CalculationInput {\n  length: number;\n  height: number;\n  coats: number;\n  coveragePerLiter: number;\n}\ninterface EstimateResult {\n  paintLiters: number;\n  cementBags: number;\n  sandVolumeM3: number;\n  estimatedCost: number;\n}\n\`\`\``
+      },
+      {
+        id: 'node-api',
+        type: 'api',
+        title: 'API Contracts & Interfaces',
+        content: `## Internal Calculation API\n- calculatePaintRequirement(input)\n- calculateMasonryMaterials(area, thickness)\n- exportCalculationReport(data)`
+      },
+      {
+        id: 'node-tasks',
+        type: 'tasks',
+        title: 'Implementation Task Breakdown',
+        content: `## Phase 1: Core Calculation Engine\n- [ ] Task 1: Setup React + Vite + Tailwind scaffolding\n- [ ] Task 2: Implement reactive formula calculation service\n- [ ] Task 3: Build interactive input controls with validation\n- [ ] Task 4: Build live results dashboard\n- [ ] Task 5: Add LocalStorage export history`
+      },
+      {
+        id: 'node-testplan',
+        type: 'test_plan',
+        title: 'Verification & QA Plan',
+        content: `## Unit Tests\n- Formula edge cases (zero values, negative inputs, large numbers)\n- Unit conversion accuracy`
+      },
+      {
+        id: 'node-validation',
+        type: 'validation',
+        title: 'Quality & Design Gate',
+        content: `## Quality Checklist\n- [x] High contrast readability\n- [x] Zero layout shifts during calculation\n- [x] Mobile friendly touch targets`
+      },
+      {
+        id: 'node-aicontext',
+        type: 'ai_context',
+        title: 'AI Coding Context Handoff',
+        content: `## AI Instructions\nBuild this application with clean separation between the mathematical formula logic and UI presentation.`
+      }
+    ];
+
+    const nodes: PlannerNode[] = nodeTemplates.map((nt, idx) => {
+      const config = NODE_CONFIGS[nt.type] || NODE_CONFIGS.custom;
+      return {
+        id: nt.id,
+        type: 'plannerNode',
+        position: coordinateMap[nt.id] || { x: 100, y: idx * 250 },
+        data: {
+          id: nt.id,
+          type: nt.type,
+          title: nt.title,
+          content: nt.content,
+          status: 'draft',
+          category: config.category,
+          version: 1,
+          versions: [
+            {
+              version: 1,
+              title: nt.title,
+              content: nt.content,
+              timestamp: now,
+              summary: 'Synthesized graph from concept'
+            }
+          ],
+          createdAt: now,
+          updatedAt: now
+        }
+      };
+    });
+
+    const edges: PlannerEdge[] = [
+      { id: 'edge-1', source: 'node-idea', target: 'node-requirements', type: 'customEdge', data: { type: 'derived-from' } },
+      { id: 'edge-2', source: 'node-requirements', target: 'node-prd', type: 'customEdge', data: { type: 'derived-from' } },
+      { id: 'edge-3', source: 'node-prd', target: 'node-uiux', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-4', source: 'node-prd', target: 'node-arch', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-5', source: 'node-prd', target: 'node-techstack', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-6', source: 'node-arch', target: 'node-datamodel', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-7', source: 'node-arch', target: 'node-api', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-8', source: 'node-datamodel', target: 'node-tasks', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-9', source: 'node-api', target: 'node-tasks', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-10', source: 'node-tasks', target: 'node-testplan', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-11', source: 'node-testplan', target: 'node-validation', type: 'customEdge', data: { type: 'dependency' } },
+      { id: 'edge-12', source: 'node-validation', target: 'node-aicontext', type: 'customEdge', data: { type: 'dependency' } }
+    ];
+
+    onApplySynthesizedGraph(projectTitle, concept, nodes, edges);
+    onClose();
+  };
+
+  const handleGenerate = async (overrideModel?: string) => {
     const trimmed = ideaInput.trim();
     if (!trimmed) {
       setErrorMsg('Please enter a project idea description.');
       return;
     }
 
-    if (!aiConfig.apiKey?.trim()) {
-      setErrorMsg('Please configure your Gemini API Key in Settings first.');
+    const currentKey = aiConfig.apiKey?.trim();
+    const isLocal = aiConfig.baseUrl?.includes('localhost') || aiConfig.baseUrl?.includes('127.0.0.1');
+
+    if (!currentKey && !isLocal && aiConfig.provider !== 'custom') {
+      setErrorMsg(`Please configure your ${activeProviderPreset.name} API Key in Settings first.`);
       return;
     }
 
     setErrorMsg('');
     setIsGenerating(true);
 
+    const modelToUse = overrideModel || selectedModel || aiConfig.model || activeProviderPreset.defaultModel;
+
     try {
-      const provider = getAIProvider(aiConfig);
+      const activeConfig: AIProviderConfig = {
+        ...aiConfig,
+        model: modelToUse
+      };
+
+      const provider = getAIProvider(activeConfig);
       const prompt = buildProjectPlanSynthesisPrompt(trimmed);
 
       const response = await provider.generate(
         {
           prompt,
           systemInstruction: SYSTEM_ARCHITECT_PROMPT,
+          model: modelToUse,
           temperature: 0.3
         },
-        aiConfig
+        activeConfig
       );
 
       // Extract JSON from response
@@ -79,7 +254,6 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
       const synthesizedNodes: PlannerNode[] = [];
       const now = new Date().toISOString();
 
-      // Layout coordinates for the 12 nodes
       const coordinateMap: Record<string, { x: number; y: number }> = {
         'node-idea': { x: 450, y: 40 },
         'node-requirements': { x: 450, y: 280 },
@@ -165,7 +339,7 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Modal Header */}
         <div className="p-4 border-b border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -189,7 +363,55 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 space-y-4">
+        <div className="p-5 space-y-4 overflow-y-auto">
+          {/* Active AI Provider & Model Bar */}
+          <div className="p-2.5 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-between gap-2 text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+              <div className="truncate">
+                <span className="text-slate-400 font-medium">Provider: </span>
+                <span className="text-slate-200 font-semibold">{activeProviderPreset.name}</span>
+                <span className="text-slate-500 mx-1.5">&bull;</span>
+                <span className="font-mono text-brand-300">{selectedModel}</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowModelOverride(!showModelOverride)}
+                className="px-2 py-1 rounded bg-slate-900 hover:bg-slate-800 text-[10px] text-slate-300 border border-slate-800 transition cursor-pointer"
+              >
+                {showModelOverride ? 'Hide Model Selector' : 'Change Model'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onClose();
+                  onOpenSettings();
+                }}
+                className="p-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800 transition cursor-pointer"
+                title="Open Settings"
+              >
+                <Settings className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Model Selector when opened */}
+          {showModelOverride && (
+            <div className="p-3 bg-slate-950/80 rounded-lg border border-slate-800 space-y-2">
+              <label className="block text-[11px] font-medium text-slate-300">
+                Switch AI Model (Type or select)
+              </label>
+              <ModelAutocomplete
+                value={selectedModel}
+                onChange={setSelectedModel}
+                provider={aiConfig.provider || 'gemini'}
+                placeholder="e.g. gemini-2.0-flash, gpt-4o, claude-3-5-sonnet-latest"
+              />
+            </div>
+          )}
+
           <div>
             <label className="block text-xs font-medium text-slate-300 mb-1.5">
               Project Concept / Problem Statement
@@ -221,41 +443,105 @@ export const GeneratePlanModal: React.FC<GeneratePlanModalProps> = ({
             </div>
           </div>
 
-          {/* Error Banner */}
+          {/* Error Banner with Smart Remediation Actions */}
           {errorMsg && (
-            <div className="bg-rose-950/60 border border-rose-800 rounded-lg p-3 text-xs text-rose-300 flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
-              <span>{errorMsg}</span>
+            <div className="bg-rose-950/60 border border-rose-800 rounded-lg p-3.5 text-xs text-rose-300 space-y-2.5">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{errorMsg}</span>
+              </div>
+
+              {/* Action Buttons to recover immediately */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <button
+                  type="button"
+                  onClick={() => handleGenerate()}
+                  disabled={isGenerating}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded bg-rose-900/60 hover:bg-rose-900 border border-rose-700/60 text-[11px] text-rose-100 transition cursor-pointer"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Retry</span>
+                </button>
+
+                {aiConfig.provider === 'gemini' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedModel('gemini-1.5-flash');
+                      handleGenerate('gemini-1.5-flash');
+                    }}
+                    disabled={isGenerating}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-amber-300 transition cursor-pointer"
+                  >
+                    <Zap className="w-3 h-3" />
+                    <span>Try Gemini 1.5 Flash</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onOpenSettings();
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 border border-slate-700 text-[11px] text-slate-300 transition cursor-pointer"
+                >
+                  <Settings className="w-3 h-3" />
+                  <span>Change Provider / Key in Settings</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => generateOfflineFallback(ideaInput)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-800 text-[11px] text-emerald-300 transition cursor-pointer"
+                  title="Generate plan directly without external AI call"
+                >
+                  <Wand2 className="w-3 h-3" />
+                  <span>Generate Offline Plan</span>
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-end gap-2">
+        <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between gap-2">
           <button
-            onClick={onClose}
-            disabled={isGenerating}
-            className="px-3 py-1.5 rounded-lg hover:bg-slate-800 text-xs font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer"
+            type="button"
+            onClick={() => generateOfflineFallback(ideaInput || 'Web Application Planner')}
+            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 transition cursor-pointer"
+            title="Instant structured synthesis without AI API"
           >
-            Cancel
+            <Layers className="w-3.5 h-3.5" />
+            <span>Instant Template</span>
           </button>
-          <button
-            onClick={handleGenerate}
-            disabled={isGenerating}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-slate-950 text-xs font-semibold shadow-lg shadow-brand-500/20 transition cursor-pointer disabled:opacity-50"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Synthesizing Architecture...</span>
-              </>
-            ) : (
-              <>
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Generate Plan</span>
-              </>
-            )}
-          </button>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={onClose}
+              disabled={isGenerating}
+              className="px-3 py-1.5 rounded-lg hover:bg-slate-800 text-xs font-medium text-slate-400 hover:text-slate-200 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleGenerate()}
+              disabled={isGenerating}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-slate-950 text-xs font-semibold shadow-lg shadow-brand-500/20 transition cursor-pointer disabled:opacity-50"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  <span>Synthesizing Architecture...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Generate Plan</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

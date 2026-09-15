@@ -1,12 +1,39 @@
 import { ProjectSchema, DesignIntentData } from '../../types/project';
 import { PlannerNode } from '../../types/node';
 import { PlannerEdge } from '../../types/edge';
+import { AIProviderType, AIProviderConfig } from '../../types/ai';
 
-function getInitialApiKey(): string {
+export function getStoredApiKey(provider: AIProviderType): string {
   if (typeof localStorage !== 'undefined') {
-    return localStorage.getItem('vibe_gemini_api_key') || '';
+    return localStorage.getItem(`vibe_${provider}_api_key`) || '';
   }
   return '';
+}
+
+export function setStoredApiKey(provider: AIProviderType, key: string): void {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem(`vibe_${provider}_api_key`, key.trim());
+  }
+}
+
+export function getInitialAiConfig(): AIProviderConfig {
+  if (typeof localStorage !== 'undefined') {
+    const provider = (localStorage.getItem('vibe_ai_provider') as AIProviderType) || 'gemini';
+    const apiKey = getStoredApiKey(provider);
+    const model = localStorage.getItem(`vibe_${provider}_model`) || (provider === 'gemini' ? 'gemini-2.0-flash' : provider === 'openai' ? 'gpt-4o-mini' : provider === 'anthropic' ? 'claude-3-5-sonnet-latest' : 'deepseek/deepseek-chat');
+    return {
+      provider,
+      apiKey,
+      model,
+      temperature: 0.4
+    };
+  }
+  return {
+    provider: 'gemini',
+    apiKey: '',
+    model: 'gemini-2.0-flash',
+    temperature: 0.4
+  };
 }
 
 export function createDefaultDesignIntent(): DesignIntentData {
@@ -208,12 +235,7 @@ export function createDefaultProject(title = 'My New Project', description = 'Vi
     nodes: initialNodes,
     edges: [],
     settings: {
-      aiConfig: {
-        provider: 'gemini',
-        apiKey: getInitialApiKey(),
-        model: 'gemini-3.7-flash',
-        temperature: 0.4
-      },
+      aiConfig: getInitialAiConfig(),
       autoSave: true,
       snapToGrid: true,
       theme: 'dark'
@@ -296,12 +318,7 @@ export function parseProjectJSON(jsonString: string): ProjectSchema {
     nodes: validatedNodes,
     edges: validatedEdges,
     settings: {
-      aiConfig: candidate.settings?.aiConfig || {
-        provider: 'gemini',
-        apiKey: getInitialApiKey(),
-        model: 'gemini-3.7-flash',
-        temperature: 0.4
-      },
+      aiConfig: candidate.settings?.aiConfig || getInitialAiConfig(),
       autoSave: candidate.settings?.autoSave ?? true,
       snapToGrid: candidate.settings?.snapToGrid ?? true,
       theme: candidate.settings?.theme || 'dark'

@@ -1,8 +1,18 @@
 ﻿import { AIProvider, AIProviderConfig, DiffLine } from '../../types/ai';
 import { geminiProvider } from './gemini';
+import { openAIProvider } from './openai';
+import { anthropicProvider } from './anthropic';
+import { customProvider } from './custom';
 
 export function getAIProvider(config: AIProviderConfig): AIProvider {
   switch (config.provider) {
+    case 'openai':
+      return openAIProvider;
+    case 'anthropic':
+      return anthropicProvider;
+    case 'openrouter':
+    case 'custom':
+      return customProvider;
     case 'gemini':
     default:
       return geminiProvider;

@@ -126,9 +126,11 @@ export const App: React.FC = () => {
       if (!targetNode) return;
 
       const apiKey = project.settings.aiConfig.apiKey?.trim();
-      if (!apiKey) {
+      const isLocal = project.settings.aiConfig.baseUrl?.includes('localhost') || project.settings.aiConfig.baseUrl?.includes('127.0.0.1');
+      if (!apiKey && !isLocal && project.settings.aiConfig.provider !== 'custom') {
         setIsSettingsOpen(true);
-        showToast('Please configure your Gemini API key in settings.');
+        const provName = project.settings.aiConfig.provider === 'openai' ? 'OpenAI / ChatGPT' : project.settings.aiConfig.provider === 'anthropic' ? 'Anthropic Claude' : project.settings.aiConfig.provider === 'openrouter' ? 'OpenRouter' : 'Gemini';
+        showToast(`Please configure your ${provName} API key in settings.`);
         return;
       }
 
@@ -356,6 +358,7 @@ export const App: React.FC = () => {
         isOpen={isGenerateModalOpen}
         onClose={() => setIsGenerateModalOpen(false)}
         aiConfig={project.settings.aiConfig}
+        onOpenSettings={() => setIsSettingsOpen(true)}
         onApplySynthesizedGraph={handleApplySynthesizedGraph}
       />
 
