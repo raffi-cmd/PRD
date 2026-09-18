@@ -145,34 +145,35 @@ export const DesignIntentModule: React.FC<DesignIntentModuleProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-950 text-slate-100 overflow-hidden">
+    <div className="w-full h-full flex flex-col bg-[#040508] text-slate-100 overflow-hidden">
       {/* Top Banner Header */}
-      <div className="p-4 border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div className="p-3.5 border-b border-white/[0.08] bg-[#06070a]/95 backdrop-blur-xl flex flex-wrap items-center justify-between gap-3 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-violet-500/20 text-violet-400 border border-violet-500/30">
-            <Compass className="w-5 h-5" />
+          <div className="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <Compass className="w-4 h-4" />
           </div>
           <div>
-            <h1 className="text-base font-semibold text-slate-100 flex items-center gap-2">
-              Design Intent & Visual Direction System
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-violet-500/20 text-violet-300 font-mono border border-violet-500/30">
-                PRD V2
+            <h1 className="text-xs tracking-wider flex items-center gap-1.5 font-mono">
+              <span className="text-white font-semibold">Design Intent</span>
+              <span className="text-slate-400 font-normal">& Direction</span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-300 font-mono border border-indigo-500/20 ml-1">
+                SYSTEM V3
               </span>
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-[11px] text-slate-400 font-sans">
               Establish North Star, Visual Metaphor, Hierarchy, and Anti-Patterns so AI coding agents build distinct, intentional software.
             </p>
           </div>
         </div>
 
         {/* 5-Tab Navigation */}
-        <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-lg border border-slate-800 text-xs overflow-x-auto">
+        <div className="flex items-center gap-1 bg-[#090a0f] p-1 rounded-lg border border-white/[0.08] text-xs overflow-x-auto">
           {[
-            { id: 'north_star', label: '1. North Star & Direction', icon: Compass },
-            { id: 'references', label: '2. Visual References', icon: ImageIcon },
-            { id: 'layout_typography', label: '3. Layout & Typography', icon: Layout },
-            { id: 'components_motion', label: '4. Components & Motion', icon: Sliders },
-            { id: 'antipatterns_critique', label: '5. Anti-Patterns & Critique', icon: ShieldAlert }
+            { id: 'north_star', label: '1. North Star', icon: Compass },
+            { id: 'references', label: '2. Visual Refs', icon: ImageIcon },
+            { id: 'layout_typography', label: '3. Layout & Type', icon: Layout },
+            { id: 'components_motion', label: '4. Components', icon: Sliders },
+            { id: 'antipatterns_critique', label: '5. Anti-Patterns', icon: ShieldAlert }
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -180,10 +181,10 @@ export const DesignIntentModule: React.FC<DesignIntentModuleProps> = ({
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-md font-mono text-[11px] transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                   isActive
-                    ? 'bg-brand-500/20 text-brand-300 border border-brand-500/30 font-semibold'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-white/[0.04]'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -200,11 +201,11 @@ export const DesignIntentModule: React.FC<DesignIntentModuleProps> = ({
         {activeTab === 'north_star' && (
           <div className="space-y-6">
             {/* 3.1 DESIGN NORTH STAR HERO CARD */}
-            <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-violet-950/30 border border-violet-500/40 shadow-xl space-y-3">
+            <div className="p-5 rounded-2xl bg-[#090a0f] border border-indigo-500/30 shadow-xl space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-violet-400" />
-                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-violet-300">
+                  <Compass className="w-4 h-4 text-indigo-400" />
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-indigo-300">
                     Design North Star
                   </span>
                 </div>

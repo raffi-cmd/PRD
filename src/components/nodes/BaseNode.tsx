@@ -1,4 +1,4 @@
-﻿import React, { useState, memo } from 'react';
+import React, { useState, memo } from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { NODE_CONFIGS } from '../../constants/nodeConfigs';
 import { PlannerNodeData, NodeStatus } from '../../types/node';
@@ -13,7 +13,8 @@ import {
   Ban,
   FileEdit,
   History,
-  Check
+  Check,
+  Sparkles
 } from 'lucide-react';
 
 export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
@@ -26,33 +27,33 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
   const statusBadges: Record<NodeStatus, { label: string; icon: React.ReactNode; badgeClass: string }> = {
     draft: {
       label: 'Draft',
-      icon: <FileEdit className="w-3.5 h-3.5 text-slate-400" />,
-      badgeClass: 'bg-slate-800 text-slate-300 border-slate-700'
+      icon: <FileEdit className="w-3 h-3 text-slate-400" />,
+      badgeClass: 'bg-white/[0.04] text-slate-400 border-white/[0.08]'
     },
     in_review: {
       label: 'In Review',
-      icon: <Clock className="w-3.5 h-3.5 text-sky-400" />,
-      badgeClass: 'bg-sky-950/70 text-sky-300 border-sky-800/90'
+      icon: <Clock className="w-3 h-3 text-sky-400" />,
+      badgeClass: 'bg-sky-950/40 text-sky-300 border-sky-500/30'
     },
     approved: {
       label: 'Approved',
-      icon: <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />,
-      badgeClass: 'bg-emerald-950/70 text-emerald-300 border-emerald-800/90'
+      icon: <CheckCircle className="w-3 h-3 text-emerald-400" />,
+      badgeClass: 'bg-emerald-950/40 text-emerald-300 border-emerald-500/30'
     },
     blocked: {
       label: 'Blocked',
-      icon: <Ban className="w-3.5 h-3.5 text-rose-400" />,
-      badgeClass: 'bg-rose-950/70 text-rose-300 border-rose-800/90'
+      icon: <Ban className="w-3 h-3 text-rose-400" />,
+      badgeClass: 'bg-rose-950/40 text-rose-300 border-rose-500/30'
     },
     complete: {
       label: 'Complete',
-      icon: <Check className="w-3.5 h-3.5 text-purple-400" />,
-      badgeClass: 'bg-purple-950/70 text-purple-300 border-purple-800/90'
+      icon: <Check className="w-3 h-3 text-purple-400" />,
+      badgeClass: 'bg-purple-950/40 text-purple-300 border-purple-500/30'
     },
     outdated: {
       label: 'Outdated',
-      icon: <AlertTriangle className="w-3.5 h-3.5 text-amber-400 animate-pulse" />,
-      badgeClass: 'bg-amber-950/80 text-amber-300 border-amber-800'
+      icon: <AlertTriangle className="w-3 h-3 text-amber-400 animate-pulse" />,
+      badgeClass: 'bg-amber-950/60 text-amber-300 border-amber-500/40'
     }
   };
 
@@ -120,43 +121,63 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
     );
   };
 
-  const handleDismissOutdated = () => {
-    window.dispatchEvent(
-      new CustomEvent('planner:dismiss-outdated', {
-        detail: { id }
-      })
-    );
-  };
-
   return (
     <div
-      className={`w-[440px] bg-slate-900/98 border rounded-xl shadow-2xl backdrop-blur-md transition-all duration-200 ${
-        selected ? 'border-brand-400 ring-2 ring-brand-500/30 shadow-brand-500/20' : 'border-slate-800'
-      } ${nodeData.status === 'outdated' ? 'border-amber-500/60 ring-1 ring-amber-500/20' : ''}`}
+      className={`group relative rounded-xl transition-all duration-150 w-80 sm:w-96 select-none ${
+        selected
+          ? 'bg-[#090a0f] border border-emerald-500/70 shadow-glow-md ring-1 ring-emerald-500/20'
+          : 'bg-[#090a0f]/95 hover:bg-[#0c0e14] border border-white/[0.08] hover:border-white/[0.16] shadow-subtle'
+      }`}
     >
-      {/* Target Handles for incoming connections */}
+      {/* Node Connection Handles */}
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
+        className="!top-[-5px] !w-2.5 !h-2.5 !bg-slate-700 hover:!bg-emerald-400 !border !border-black"
+      />
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        className="!bottom-[-5px] !w-2.5 !h-2.5 !bg-slate-700 hover:!bg-emerald-400 !border !border-black"
       />
       <Handle
         type="target"
         position={Position.Left}
-        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
+        id="handle-left"
+        className="!left-[-5px] !w-2.5 !h-2.5 !bg-slate-700 hover:!bg-emerald-400 !border !border-black"
+      />
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="handle-right"
+        className="!right-[-5px] !w-2.5 !h-2.5 !bg-slate-700 hover:!bg-emerald-400 !border !border-black"
       />
 
+      {/* Floating Action Toolbar on Selected */}
+      {selected && (
+        <NodeToolbar
+          onTriggerAI={handleTriggerAI}
+          onDuplicate={handleDuplicate}
+          onDelete={handleDelete}
+          onToggleCollapse={handleToggleCollapse}
+          isCollapsed={Boolean(nodeData.isCollapsed)}
+        />
+      )}
+
       {/* Node Header */}
-      <div className="p-3.5 border-b border-slate-800 flex items-center justify-between gap-2 bg-slate-950/60 rounded-t-xl">
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
-          {/* Node Type pill */}
+      <div className="p-3 border-b border-white/[0.06] flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           <span
-            className={`text-[11px] uppercase font-mono px-2.5 py-0.5 rounded border font-semibold tracking-wider shrink-0 ${config.accentBg}`}
-          >
+            className="w-2 h-2 rounded-full shrink-0"
+            style={{ backgroundColor: config.color || '#10b981' }}
+          />
+
+          <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 shrink-0">
             {config.label}
           </span>
 
-          {/* Title */}
+          <span className="text-white/[0.15]">&bull;</span>
+
           {isEditingTitle ? (
             <input
               type="text"
@@ -168,91 +189,71 @@ export const BaseNode: React.FC<NodeProps> = memo(({ id, data, selected }) => {
                 if (e.key === 'Escape') setIsEditingTitle(false);
               }}
               autoFocus
-              className="bg-slate-950 border border-brand-500 rounded px-2 py-0.5 text-sm text-slate-100 font-semibold focus:outline-none w-full nodrag"
+              className="bg-[#040508] border border-emerald-500/50 rounded px-1.5 py-0.5 text-xs text-white font-medium focus:outline-none w-full font-mono"
             />
           ) : (
             <h3
               onDoubleClick={() => setIsEditingTitle(true)}
-              className="text-sm font-semibold text-slate-100 truncate cursor-text flex-1 hover:text-brand-300 transition"
-              title="Double click to rename"
+              className="text-xs font-medium text-slate-200 hover:text-white truncate cursor-pointer transition"
+              title="Double click to edit title"
             >
               {nodeData.title}
             </h3>
           )}
         </div>
 
-        {/* Controls on header right: Version badge, Status pill, Collapse */}
-        <div className="flex items-center gap-2 shrink-0">
-          <span
-            className="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 flex items-center gap-1 border border-slate-700/60"
-            title={`Version ${nodeData.version || 1}`}
-          >
-            <History className="w-3 h-3 text-slate-400" />
-            <span>v{nodeData.version || 1}</span>
-          </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Version badge */}
+          {nodeData.version && nodeData.version > 1 && (
+            <span className="flex items-center gap-0.5 text-[9px] font-mono text-slate-400 px-1 py-0.2 rounded bg-white/[0.03] border border-white/[0.06]">
+              <History className="w-2.5 h-2.5" />
+              v{nodeData.version}
+            </span>
+          )}
 
+          {/* Interactive Status Badge */}
           <button
             onClick={cycleStatus}
-            className={`flex items-center gap-1 text-[11px] font-medium px-2.5 py-0.5 rounded-full border transition cursor-pointer ${currentStatusBadge.badgeClass}`}
+            className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium border transition cursor-pointer ${currentStatusBadge.badgeClass}`}
             title="Click to cycle status"
           >
             {currentStatusBadge.icon}
             <span>{currentStatusBadge.label}</span>
           </button>
 
+          {/* Collapse/Expand Toggle */}
           <button
             onClick={handleToggleCollapse}
-            className="p-1.5 rounded hover:bg-slate-800 text-slate-400 hover:text-slate-200 transition cursor-pointer"
-            title={nodeData.collapsed ? 'Expand node' : 'Collapse node'}
+            className="p-1 rounded text-slate-400 hover:text-slate-200 hover:bg-white/[0.04] transition cursor-pointer"
+            title={nodeData.isCollapsed ? 'Expand node' : 'Collapse node'}
           >
-            {nodeData.collapsed ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            {nodeData.isCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
           </button>
         </div>
       </div>
 
-      {/* Outdated Warning Banner */}
+      {/* Outdated Notice Banner */}
       {nodeData.status === 'outdated' && (
-        <div className="bg-amber-950/60 border-b border-amber-900/80 px-3.5 py-2 flex items-center justify-between text-xs text-amber-300">
-          <div className="flex items-center gap-2 truncate">
-            <AlertTriangle className="w-4 h-4 shrink-0 text-amber-400" />
-            <span className="truncate">{nodeData.outdatedReason || 'Upstream dependencies modified.'}</span>
+        <div className="bg-amber-950/40 border-b border-amber-500/30 px-3 py-1.5 text-[11px] text-amber-300 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
+            <span>Upstream dependency modified</span>
           </div>
           <button
-            onClick={handleDismissOutdated}
-            className="text-[11px] bg-amber-900/60 hover:bg-amber-900/90 border border-amber-700/60 px-2 py-0.5 rounded text-amber-200 transition cursor-pointer ml-2 shrink-0 font-medium"
+            onClick={() => handleTriggerAI('improve')}
+            className="text-[10px] font-mono underline hover:text-amber-100 flex items-center gap-0.5"
           >
-            Acknowledge
+            <Sparkles className="w-2.5 h-2.5" /> Re-sync
           </button>
         </div>
       )}
 
-      {/* Node Body */}
-      <NodeMarkdownBody
-        content={nodeData.content}
-        onSaveContent={handleSaveContent}
-        isCollapsed={nodeData.collapsed}
-      />
-
-      {/* Node Footer Toolbar */}
-      <NodeToolbar
-        onAIAction={handleTriggerAI}
-        onDuplicate={handleDuplicate}
-        onDelete={handleDelete}
-      />
-
-      {/* Source Handles for outgoing connections */}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-3.5 h-3.5 !bg-slate-600 hover:!bg-brand-400 !border-2 !border-slate-950 transition-colors"
-      />
+      {/* Node Markdown Body */}
+      {!nodeData.isCollapsed && (
+        <div className="p-3">
+          <NodeMarkdownBody content={nodeData.content} onSaveContent={handleSaveContent} />
+        </div>
+      )}
     </div>
   );
 });
-
-BaseNode.displayName = 'BaseNode';

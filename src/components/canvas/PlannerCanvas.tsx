@@ -1,4 +1,4 @@
-﻿import React, { useMemo, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import {
   ReactFlow,
   ReactFlowProvider,
@@ -152,7 +152,7 @@ const PlannerCanvasInner: React.FC<PlannerCanvasProps> = ({ store, onTriggerAIFo
   }, [project, setProject]);
 
   return (
-    <div className="w-full h-full relative bg-slate-950">
+    <div className="w-full h-full relative bg-[#040508]">
       <ReactFlow
         nodes={project.nodes as unknown as Node[]}
         edges={project.edges as unknown as Edge[]}
@@ -173,16 +173,16 @@ const PlannerCanvasInner: React.FC<PlannerCanvasProps> = ({ store, onTriggerAIFo
           animated: true
         }}
       >
-        <Background variant={BackgroundVariant.Dots} gap={24} size={1.5} color="#334155" />
+        <Background variant={BackgroundVariant.Dots} gap={28} size={1.2} color="#1e293b" />
         
         {/* Prominent Zoom & View Controls */}
         <CanvasControls onAutoLayout={handleAutoLayout} />
 
         {/* MiniMap on bottom-right */}
         <MiniMap
-          className="!bg-slate-900/95 !border !border-slate-800 !rounded-xl !shadow-2xl"
-          nodeColor="#334155"
-          maskColor="rgba(15, 23, 42, 0.85)"
+          className="!bg-[#090a0f] !border !border-white/[0.12] !rounded-xl !shadow-2xl"
+          nodeColor="#10b981"
+          maskColor="rgba(4, 5, 8, 0.85)"
           zoomable
           pannable
         />
